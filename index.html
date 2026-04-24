@@ -25,29 +25,29 @@
 
     <div class="max-w-6xl mx-auto px-4 py-8">
         <header class="flex flex-col items-center mb-12 gap-4 text-center">
-            <img src="https://peaceproject.com/wp-content/uploads/LS455.jpg" alt="Stealie" class="w-32 h-32 md:w-44 md:h-44 drop-shadow-[0_0_25px_rgba(239,68,68,0.4)] transition-transform hover:scale-105 duration-500 rounded-full border-4 border-gray-900">
+            <img src="https://peaceproject.com/wp-content/uploads/LS455.jpg" alt="Stealie" class="w-32 h-32 md:w-44 md:h-44 drop-shadow-[0_0_25px_rgba(239,68,68,0.4)] rounded-full border-4 border-gray-900">
             
             <div class="mt-2">
-                <h1 class="text-6xl font-black italic dead-gradient tracking-tighter leading-none">DEADTUNES</h1>
-                <p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.3em] mt-3">The Definitive Soundboard Vault</p>
+                <h1 class="text-6xl font-black italic dead-gradient tracking-tighter leading-none text-red-600">DEADTUNES</h1>
+                <p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.3em] mt-3">High Fidelity Soundboard Vault</p>
                 
                 <div class="mt-6 flex flex-col items-center gap-1">
-                    <p class="text-[9px] text-gray-600 uppercase tracking-[0.2em] font-bold italic">Total Travelers</p>
-                    <div class="bg-gray-900/80 px-4 py-2 rounded-xl border border-gray-800 flex justify-center">
-                        <img src="https://count.getloli.com/get/@jk_deadtunes_v3?theme=asoul" alt="Counter" class="h-10 opacity-90 brightness-110">
+                    <p class="text-[9px] text-gray-600 uppercase tracking-[0.2em] font-bold italic">Unique Travelers</p>
+                    <div class="bg-gray-900/80 px-4 py-2 rounded-xl border border-gray-800 flex justify-center shadow-inner">
+                        <img src="https://count.getloli.com/get/@jk_deadtunes_unique?theme=asoul&type=uv" alt="Unique Visitors" class="h-10 opacity-90 brightness-110">
                     </div>
                 </div>
             </div>
 
             <div class="flex gap-2 w-full max-w-md mt-4">
-                <input type="text" id="searchInput" placeholder="Search (e.g., Hampton 1988)" class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-3 w-full focus:outline-none focus:border-red-600 transition-all text-white">
+                <input type="text" id="searchInput" placeholder="Search (e.g., Hampton 1988)" class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-3 w-full focus:outline-none focus:border-red-600 transition-all text-white placeholder-gray-600">
                 <button onclick="handleSearch()" class="bg-red-600 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-black transition-all duration-300 uppercase text-sm">Search</button>
             </div>
         </header>
 
         <div id="loading" class="hidden flex flex-col items-center py-20">
             <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-red-500 mb-4 border-r-transparent"></div>
-            <p class="text-gray-600 text-xs uppercase tracking-[0.3em]">Filtering the Vault...</p>
+            <p class="text-gray-600 text-xs uppercase tracking-[0.3em]">Sorting Chronologically...</p>
         </div>
 
         <div id="results" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
@@ -74,33 +74,34 @@
             allShows = [];
             displayedCount = 0;
 
+            // Search query looking for Soundboards with 4-5 stars
             let query = 'collection:(GratefulDead) AND avg_rating:[4 TO 5] AND subject:(soundboard)';
             if (searchTerm) query += ` AND (${searchTerm})`;
 
-            // Fetch a larger set to allow for deduplication
-            const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=date+asc&rows=150&output=json`;
+            // Fetch a wide range to allow for proper date deduplication
+            const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=date+asc&rows=200&output=json`;
 
             try {
                 const response = await fetch(url);
                 const data = await response.json();
                 
-                // --- DEDUPLICATION & BEST VERSION LOGIC ---
-                const uniqueShows = {};
+                // --- DEDUPLICATION: One show per date, highest downloads only ---
+                const uniqueShowsMap = {};
                 data.response.docs.forEach(item => {
-                    const date = item.date || 'Unknown';
-                    // If we haven't seen this date, or this version has more downloads (popularity = quality proxy)
-                    if (!uniqueShows[date] || item.downloads > uniqueShows[date].downloads) {
-                        uniqueShows[date] = item;
+                    if (!item.date) return;
+                    const dateOnly = item.date.split('T')[0];
+                    if (!uniqueShowsMap[dateOnly] || item.downloads > uniqueShowsMap[dateOnly].downloads) {
+                        uniqueShowsMap[dateOnly] = item;
                     }
                 });
 
-                // Convert back to array and sort Jan -> Dec
-                allShows = Object.values(uniqueShows).sort((a, b) => new Date(a.date) - new Date(b.date));
+                // Sort array strictly by date (Jan -> Dec)
+                allShows = Object.values(uniqueShowsMap).sort((a, b) => new Date(a.date) - new Date(b.date));
                 
                 loading.classList.add('hidden');
                 renderNextBatch();
             } catch (err) {
-                loading.innerHTML = "<p class='text-red-500 font-bold'>Archive is busy. Try a more specific year.</p>";
+                loading.innerHTML = "<p class='text-red-500 font-bold'>Archive API Limit Reached. Wait 1 min.</p>";
             }
         }
 
@@ -111,26 +112,25 @@
             const nextBatch = allShows.slice(displayedCount, displayedCount + BATCH_SIZE);
             
             if (nextBatch.length === 0 && displayedCount === 0) {
-                container.innerHTML = '<p class="col-span-full text-center text-gray-600 py-10">No high-rated shows found.</p>';
+                container.innerHTML = '<p class="col-span-full text-center text-gray-600 py-10 uppercase tracking-widest text-xs font-bold">The Vault is empty for this search.</p>';
                 return;
             }
 
             container.innerHTML += nextBatch.map(show => `
-                <div class="glass p-7 rounded-3xl border border-gray-800 hover:border-red-600/40 transition-all duration-500 flex flex-col justify-between shadow-2xl">
+                <div class="glass p-7 rounded-3xl border border-gray-800 hover:border-red-600/40 transition-all duration-500 flex flex-col justify-between shadow-2xl h-full">
                     <div>
-                        <div class="flex justify-between items-center mb-4 text-xs font-mono">
-                            <span class="text-red-500 font-bold">${show.date ? show.date.split('T')[0] : 'N/A'}</span>
+                        <div class="flex justify-between items-center mb-4 text-[10px] font-mono">
+                            <span class="text-red-500 font-bold">${show.date ? show.date.split('T')[0] : 'UNKNOWN DATE'}</span>
                             <span class="text-yellow-500 font-black">★ ${show.avg_rating}</span>
                         </div>
-                        <h3 class="font-bold text-md leading-tight mb-2 line-clamp-2">${show.title}</h3>
-                        <p class="text-gray-500 text-[10px] uppercase tracking-wider mb-6">${show.venue || 'The Vault'}</p>
+                        <h3 class="font-bold text-md leading-tight mb-2 line-clamp-2 text-left">${show.title}</h3>
+                        <p class="text-gray-500 text-[10px] uppercase tracking-wider mb-6 text-left opacity-60">${show.venue || 'The Great Beyond'}</p>
                     </div>
-                    <button onclick="playShow('${show.identifier}')" class="w-full bg-white/5 hover:bg-blue-600 text-white font-black py-2 rounded-xl transition-all uppercase text-[10px] tracking-widest border border-white/10">Listen Now</button>
+                    <button onclick="playShow('${show.identifier}')" class="w-full bg-white/5 hover:bg-blue-600 text-white font-black py-2 rounded-xl transition-all uppercase text-[10px] tracking-widest border border-white/10 mt-auto">Stream Now</button>
                 </div>
             `).join('');
 
             displayedCount += BATCH_SIZE;
-
             if (displayedCount < allShows.length) {
                 loadMoreBtn.classList.remove('hidden');
             } else {
@@ -151,7 +151,7 @@
             document.getElementById('player-iframe').innerHTML = '';
         }
 
-        // Initial fetch
+        // Initial Load (Default Search)
         handleSearch();
     </script>
 </body>
