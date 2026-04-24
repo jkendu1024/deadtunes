@@ -9,9 +9,10 @@
         .glass { background: rgba(31, 41, 55, 0.7); backdrop-filter: blur(10px); }
         .dead-gradient { background: linear-gradient(90deg, #ef4444, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         body { background-color: #000; background-image: radial-gradient(circle at center, #111 0%, #000 100%); }
+        .counter-glow { text-shadow: 0 0 10px rgba(239, 68, 68, 0.8); }
     </style>
 </head>
-<body class="text-gray-100 min-h-screen">
+<body class="text-gray-100 min-h-screen font-sans">
 
     <div id="player-container" class="sticky top-0 z-50 w-full bg-gray-900 border-b border-red-900 hidden shadow-2xl">
         <div class="max-w-6xl mx-auto p-2 flex flex-col">
@@ -33,8 +34,8 @@
                 
                 <div class="mt-6 flex flex-col items-center gap-1">
                     <p class="text-[9px] text-gray-600 uppercase tracking-[0.2em] font-bold italic">Total Travelers</p>
-                    <div class="bg-gray-900 px-4 py-1 rounded-md border border-gray-800 shadow-inner">
-                        <img src="https://www.cutercounter.com/hits.php?id=gvxpako&nd=5&style=1" border="0" alt="visitor counter" class="opacity-80 grayscale brightness-200 h-6">
+                    <div class="bg-gray-900/50 px-4 py-1 rounded-lg border border-gray-800 shadow-inner">
+                        <span id="visitor-count" class="text-xl font-mono text-red-600 counter-glow tracking-[0.2em]">00420</span>
                     </div>
                 </div>
             </div>
@@ -55,6 +56,18 @@
     </div>
 
     <script>
+        // Simple Counter Logic using a public API
+        async function getCount() {
+            try {
+                const response = await fetch('https://api.countapi.xyz/hit/deadtunes-jkendu/visits');
+                const data = await response.json();
+                document.getElementById('visitor-count').innerText = data.value.toString().padStart(5, '0');
+            } catch (e) {
+                // If API fails, we show a "Dead" number
+                document.getElementById('visitor-count').innerText = "00508"; 
+            }
+        }
+
         async function fetchShows() {
             const searchTerm = document.getElementById('searchInput').value;
             const container = document.getElementById('results');
@@ -73,7 +86,7 @@
                 const data = await response.json();
                 displayShows(data.response.docs);
             } catch (err) {
-                loading.innerHTML = "<p class='text-red-500 uppercase tracking-widest'>Error connecting to Archive.org</p>";
+                loading.innerHTML = "<p class='text-red-500 uppercase tracking-widest font-bold font-mono'>Vault Connection Error</p>";
             }
         }
 
@@ -82,23 +95,23 @@
             document.getElementById('loading').classList.add('hidden');
 
             if (!shows || shows.length === 0) {
-                container.innerHTML = '<p class="col-span-full text-center text-gray-600 py-10 text-lg uppercase tracking-widest font-bold font-mono">No 5-Star shows found.</p>';
+                container.innerHTML = '<p class="col-span-full text-center text-gray-600 py-10 text-lg uppercase tracking-widest font-bold font-mono italic">No 5-Star shows found.</p>';
                 return;
             }
 
             container.innerHTML = shows.map(show => `
-                <div class="glass p-7 rounded-3xl border border-gray-800 hover:border-red-600/40 transition-all duration-500 flex flex-col justify-between shadow-2xl group">
+                <div class="glass p-7 rounded-3xl border border-gray-800 hover:border-red-600/40 transition-all duration-500 flex flex-col justify-between shadow-2xl group text-left">
                     <div>
                         <div class="flex justify-between items-center mb-4">
                             <span class="text-red-500 font-bold font-mono text-sm tracking-tighter">${show.date || ''}</span>
                             <span class="text-yellow-500 text-xs font-black bg-yellow-500/10 px-2 py-1 rounded-md">★ ${show.avg_rating}</span>
                         </div>
                         <h3 class="font-bold text-lg leading-snug mb-3 group-hover:text-red-500 transition-colors">${show.title}</h3>
-                        <p class="text-gray-400 text-[11px] font-medium uppercase tracking-wider mb-8 text-left">${show.venue || 'Unknown Venue'}</p>
+                        <p class="text-gray-400 text-[11px] font-medium uppercase tracking-wider mb-8">${show.venue || 'Unknown Venue'}</p>
                     </div>
                     <button onclick="playShow('${show.identifier}')" 
-                            class="w-full bg-white/5 hover:bg-blue-600 text-white font-black py-3 rounded-2xl transition-all duration-300 uppercase text-[10px] tracking-[0.2em] border border-white/10">
-                            Listen Now
+                            class="w-full bg-white/5 hover:bg-blue-600 text-white font-black py-3 rounded-2xl transition-all duration-300 uppercase text-[10px] tracking-[0.2em] border border-white/10 hover:border-blue-600">
+                            Stream Now
                     </button>
                 </div>
             `).join('');
@@ -117,6 +130,8 @@
             document.getElementById('player-iframe').innerHTML = '';
         }
 
+        // Run
+        getCount();
         fetchShows();
     </script>
 </body>
