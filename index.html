@@ -9,7 +9,6 @@
         .glass { background: rgba(31, 41, 55, 0.7); backdrop-filter: blur(10px); }
         .dead-gradient { background: linear-gradient(90deg, #ef4444, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         body { background-color: #000; background-image: radial-gradient(circle at center, #111 0%, #000 100%); }
-        /* Vault-style Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #000; }
         ::-webkit-scrollbar-thumb { background: #ef4444; border-radius: 10px; }
@@ -26,102 +25,123 @@
 
     <div class="max-w-6xl mx-auto px-4 py-8">
         <header class="flex flex-col items-center mb-12 gap-4 text-center">
-            
-            <img src="https://peaceproject.com/wp-content/uploads/LS455.jpg" 
-                 alt="Steal Your Face" 
-                 class="w-32 h-32 md:w-44 md:h-44 drop-shadow-[0_0_25px_rgba(239,68,68,0.4)] transition-transform hover:scale-105 duration-500 rounded-full border-4 border-gray-900">
+            <img src="https://peaceproject.com/wp-content/uploads/LS455.jpg" alt="Stealie" class="w-32 h-32 md:w-44 md:h-44 drop-shadow-[0_0_25px_rgba(239,68,68,0.4)] transition-transform hover:scale-105 duration-500 rounded-full border-4 border-gray-900">
             
             <div class="mt-2">
                 <h1 class="text-6xl font-black italic dead-gradient tracking-tighter leading-none">DEADTUNES</h1>
-                <p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.3em] mt-3 font-semibold">High Fidelity Soundboards</p>
+                <p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.3em] mt-3">The Definitive Soundboard Vault</p>
                 
                 <div class="mt-6 flex flex-col items-center gap-1">
                     <p class="text-[9px] text-gray-600 uppercase tracking-[0.2em] font-bold italic">Total Travelers</p>
-                    <div class="bg-gray-900 px-4 py-2 rounded-lg border border-gray-800 shadow-inner min-w-[120px] flex justify-center">
-                        <img src="https://count.getloli.com/get/@jkendu1024_deadtunes?theme=rule734" 
-                             alt="Visitor Count" 
-                             class="h-6 opacity-90 brightness-125"
-                             onerror="this.parentElement.innerHTML='<span class=\'text-red-600 font-mono text-xs uppercase tracking-widest\'>Uncle Sam Connected</span>'">
+                    <div class="bg-gray-900/80 px-4 py-2 rounded-xl border border-gray-800 flex justify-center">
+                        <img src="https://count.getloli.com/get/@jk_deadtunes_v3?theme=asoul" alt="Counter" class="h-10 opacity-90 brightness-110">
                     </div>
                 </div>
             </div>
 
             <div class="flex gap-2 w-full max-w-md mt-4">
-                <input type="text" id="searchInput" placeholder="Year or Venue (e.g. 1972)" 
-                       class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-3 w-full focus:outline-none focus:border-red-600 transition-all text-white placeholder-gray-600">
-                <button onclick="fetchShows()" class="bg-red-600 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-black transition-all duration-300 uppercase text-sm">Search</button>
+                <input type="text" id="searchInput" placeholder="Search (e.g., Hampton 1988)" class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-3 w-full focus:outline-none focus:border-red-600 transition-all text-white">
+                <button onclick="handleSearch()" class="bg-red-600 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-black transition-all duration-300 uppercase text-sm">Search</button>
             </div>
         </header>
 
-        <div id="loading" class="flex flex-col items-center py-20">
-            <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-red-500 mb-4 border-r-2 border-r-transparent"></div>
-            <p class="text-gray-600 text-xs uppercase tracking-[0.3em]">Opening the Vault...</p>
+        <div id="loading" class="hidden flex flex-col items-center py-20">
+            <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-red-500 mb-4 border-r-transparent"></div>
+            <p class="text-gray-600 text-xs uppercase tracking-[0.3em]">Filtering the Vault...</p>
         </div>
 
         <div id="results" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+        
+        <div id="loadMoreContainer" class="flex justify-center mt-12 mb-20 hidden">
+            <button onclick="renderNextBatch()" class="border border-red-600 text-red-500 hover:bg-red-600 hover:text-white px-10 py-3 rounded-full font-bold transition-all uppercase tracking-widest text-xs shadow-lg">Load More Shows</button>
+        </div>
     </div>
 
     <script>
-        // MAIN FETCH FUNCTION (Fetches high-fidelity SBDs only)
-        async function fetchShows() {
+        let allShows = [];
+        let displayedCount = 0;
+        const BATCH_SIZE = 12;
+
+        async function handleSearch() {
             const searchTerm = document.getElementById('searchInput').value;
             const container = document.getElementById('results');
             const loading = document.getElementById('loading');
+            const loadMoreBtn = document.getElementById('loadMoreContainer');
             
             loading.classList.remove('hidden');
+            loadMoreBtn.classList.add('hidden');
             container.innerHTML = '';
+            allShows = [];
+            displayedCount = 0;
 
-            // Magic Query: Grateful Dead + SBD + 4-5 Stars
-            let query = 'collection:(GratefulDead) AND avg_rating:[4 TO 5] AND mediatype:(etree) AND subject:(soundboard)';
-            if (searchTerm) query += ` AND (title:(${searchTerm}) OR year:(${searchTerm}) OR venue:(${searchTerm}))`;
+            let query = 'collection:(GratefulDead) AND avg_rating:[4 TO 5] AND subject:(soundboard)';
+            if (searchTerm) query += ` AND (${searchTerm})`;
 
-            const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date&sort[]=date+desc&rows=45&output=json`;
+            // Fetch a larger set to allow for deduplication
+            const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=date+asc&rows=150&output=json`;
 
             try {
                 const response = await fetch(url);
                 const data = await response.json();
-                displayShows(data.response.docs);
+                
+                // --- DEDUPLICATION & BEST VERSION LOGIC ---
+                const uniqueShows = {};
+                data.response.docs.forEach(item => {
+                    const date = item.date || 'Unknown';
+                    // If we haven't seen this date, or this version has more downloads (popularity = quality proxy)
+                    if (!uniqueShows[date] || item.downloads > uniqueShows[date].downloads) {
+                        uniqueShows[date] = item;
+                    }
+                });
+
+                // Convert back to array and sort Jan -> Dec
+                allShows = Object.values(uniqueShows).sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                loading.classList.add('hidden');
+                renderNextBatch();
             } catch (err) {
-                loading.innerHTML = "<p class='text-red-500 uppercase tracking-widest font-bold font-mono text-xs'>Error connecting to Archive.org</p>";
+                loading.innerHTML = "<p class='text-red-500 font-bold'>Archive is busy. Try a more specific year.</p>";
             }
         }
 
-        // RENDER FUNCTION (Builds the 4/5 star SBD result cards)
-        function displayShows(shows) {
+        function renderNextBatch() {
             const container = document.getElementById('results');
-            document.getElementById('loading').classList.add('hidden');
-
-            if (!shows || shows.length === 0) {
-                container.innerHTML = '<p class="col-span-full text-center text-gray-600 py-10 text-lg uppercase tracking-widest font-bold font-mono italic">No 5-Star shows found for that search.</p>';
+            const loadMoreBtn = document.getElementById('loadMoreContainer');
+            
+            const nextBatch = allShows.slice(displayedCount, displayedCount + BATCH_SIZE);
+            
+            if (nextBatch.length === 0 && displayedCount === 0) {
+                container.innerHTML = '<p class="col-span-full text-center text-gray-600 py-10">No high-rated shows found.</p>';
                 return;
             }
 
-            container.innerHTML = shows.map(show => `
-                <div class="glass p-7 rounded-3xl border border-gray-800 hover:border-blue-600/40 transition-all duration-500 flex flex-col justify-between shadow-2xl group text-left h-full">
+            container.innerHTML += nextBatch.map(show => `
+                <div class="glass p-7 rounded-3xl border border-gray-800 hover:border-red-600/40 transition-all duration-500 flex flex-col justify-between shadow-2xl">
                     <div>
-                        <div class="flex justify-between items-center mb-4">
-                            <span class="text-red-500 font-bold font-mono text-sm tracking-tighter">${show.date || ''}</span>
-                            <span class="text-yellow-500 text-xs font-black bg-yellow-500/10 px-2 py-1 rounded-md border border-yellow-500/20 tracking-tighter">★ ${show.avg_rating}</span>
+                        <div class="flex justify-between items-center mb-4 text-xs font-mono">
+                            <span class="text-red-500 font-bold">${show.date ? show.date.split('T')[0] : 'N/A'}</span>
+                            <span class="text-yellow-500 font-black">★ ${show.avg_rating}</span>
                         </div>
-                        <h3 class="font-bold text-lg leading-snug mb-3 group-hover:text-red-500 transition-colors line-clamp-2">${show.title}</h3>
-                        <p class="text-gray-400 text-[11px] font-medium uppercase tracking-wider mb-8 opacity-70">${show.venue || 'The Great Beyond'}</p>
+                        <h3 class="font-bold text-md leading-tight mb-2 line-clamp-2">${show.title}</h3>
+                        <p class="text-gray-500 text-[10px] uppercase tracking-wider mb-6">${show.venue || 'The Vault'}</p>
                     </div>
-                    <button onclick="playShow('${show.identifier}')" 
-                            class="w-full bg-white/5 hover:bg-blue-600 text-white font-black py-3 rounded-2xl transition-all duration-300 uppercase text-[10px] tracking-[0.2em] border border-white/10 hover:border-blue-600 mt-auto">
-                            Stream Soundboard
-                    </button>
+                    <button onclick="playShow('${show.identifier}')" class="w-full bg-white/5 hover:bg-blue-600 text-white font-black py-2 rounded-xl transition-all uppercase text-[10px] tracking-widest border border-white/10">Listen Now</button>
                 </div>
             `).join('');
+
+            displayedCount += BATCH_SIZE;
+
+            if (displayedCount < allShows.length) {
+                loadMoreBtn.classList.remove('hidden');
+            } else {
+                loadMoreBtn.classList.add('hidden');
+            }
         }
 
-        // PLAYER LOGIC (Injects embedded player, autoplays)
         function playShow(id) {
             const container = document.getElementById('player-container');
             const frame = document.getElementById('player-iframe');
-            
-            // Player embeds and autoplays SBD (agreement permitting)
-            frame.innerHTML = `<iframe src="https://archive.org/embed/${id}&playlist=1&autoplay=1" width="100%" height="150" frameborder="0"></iframe>`;
-            
+            frame.innerHTML = `<iframe src="https://archive.org/embed/${id}&playlist=1" width="100%" height="150" frameborder="0"></iframe>`;
             container.classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -131,8 +151,8 @@
             document.getElementById('player-iframe').innerHTML = '';
         }
 
-        // INITIAL BOOT (Loads most recent top-rated SBDs on startup)
-        fetchShows();
+        // Initial fetch
+        handleSearch();
     </script>
 </body>
 </html>
