@@ -8,9 +8,10 @@
     <style>
         .glass { background: rgba(31, 41, 55, 0.7); backdrop-filter: blur(10px); }
         .dead-gradient { background: linear-gradient(90deg, #ef4444, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        body { background-color: #000; background-image: radial-gradient(circle at center, #111 0%, #000 100%); }
     </style>
 </head>
-<body class="bg-black text-gray-100 min-h-screen">
+<body class="text-gray-100 min-h-screen">
 
     <div id="player-container" class="sticky top-0 z-50 w-full bg-gray-900 border-b border-red-900 hidden shadow-2xl">
         <div class="max-w-6xl mx-auto p-2 flex flex-col">
@@ -22,25 +23,25 @@
     <div class="max-w-6xl mx-auto px-4 py-8">
         <header class="flex flex-col items-center mb-12 gap-4 text-center">
             
-            <img src="https://upload.wikimedia.org/wikipedia/en/0/03/Grateful_Dead_-_Steal_Your_Face.png" 
+            <img src="https://www.dead.net/sites/g/files/g2000007851/files/stealie_2.png" 
                  alt="Steal Your Face" 
-                 class="w-32 h-32 md:w-44 md:h-44 drop-shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-transform hover:scale-110 duration-500">
+                 class="w-32 h-32 md:w-44 md:h-44 drop-shadow-[0_0_25px_rgba(239,68,68,0.3)] transition-transform hover:rotate-12 duration-500">
             
             <div class="mt-2">
                 <h1 class="text-6xl font-black italic dead-gradient tracking-tighter leading-none">DEADTUNES</h1>
-                <p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.3em] mt-3">4 & 5 Star Soundboards Only</p>
+                <p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.3em] mt-3 font-semibold">The Best of Archive.org</p>
                 
                 <div class="mt-6 flex flex-col items-center gap-2">
                     <p class="text-[9px] text-gray-600 uppercase tracking-[0.2em] font-bold">Total Travelers</p>
-                    <img src="https://hitwebcounter.com/counter/counter.php?page=jk_deadtunes_v1&style=0005&nbdigits=5&type=page&initCount=0" 
-                         title="Free Counter" Alt="web counter" border="0" class="opacity-60 grayscale brightness-150">
+                    <img src="https://hitwebcounter.com/counter/counter.php?page=jk_deadtunes_final&style=0005&nbdigits=5&type=page&initCount=0" 
+                         title="Free Counter" Alt="web counter" border="0" class="opacity-50 grayscale brightness-150">
                 </div>
             </div>
 
             <div class="flex gap-2 w-full max-w-md mt-4">
                 <input type="text" id="searchInput" placeholder="Year or Venue (e.g. 1972)" 
-                       class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-3 w-full focus:outline-none focus:border-blue-500 transition-colors">
-                <button onclick="fetchShows()" class="bg-red-600 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-black transition-all duration-300 uppercase text-sm tracking-tighter">Search</button>
+                       class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-3 w-full focus:outline-none focus:border-red-600 transition-all text-white">
+                <button onclick="fetchShows()" class="bg-red-600 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-black transition-all duration-300 uppercase text-sm">Search</button>
             </div>
         </header>
 
@@ -78,7 +79,7 @@
                 const data = await response.json();
                 displayShows(data.response.docs);
             } catch (err) {
-                loading.innerText = "Error accessing the Archive.org vault.";
+                loading.innerHTML = "<p class='text-red-500 uppercase tracking-widest'>Error connecting to Archive.org</p>";
             }
         }
 
@@ -86,24 +87,24 @@
             const container = document.getElementById('results');
             document.getElementById('loading').classList.add('hidden');
 
-            if (shows.length === 0) {
-                container.innerHTML = '<p class="col-span-full text-center text-gray-600 py-10 text-lg uppercase tracking-widest font-bold">No shows found.</p>';
+            if (!shows || shows.length === 0) {
+                container.innerHTML = '<p class="col-span-full text-center text-gray-600 py-10 text-lg uppercase tracking-widest font-bold font-mono">No 5-Star shows found for that search.</p>';
                 return;
             }
 
             container.innerHTML = shows.map(show => `
-                <div class="glass p-7 rounded-3xl border border-gray-800 hover:border-blue-900/50 transition-all duration-500 flex flex-col justify-between shadow-2xl group">
+                <div class="glass p-7 rounded-3xl border border-gray-800 hover:border-red-600/40 transition-all duration-500 flex flex-col justify-between shadow-2xl group">
                     <div>
                         <div class="flex justify-between items-center mb-4">
-                            <span class="text-red-500 font-bold font-mono text-sm">${show.date || ''}</span>
-                            <span class="text-yellow-500 text-xs font-black bg-yellow-500/10 px-2 py-1 rounded-md tracking-tighter">★ ${show.avg_rating}</span>
+                            <span class="text-red-500 font-bold font-mono text-sm tracking-tighter">${show.date || ''}</span>
+                            <span class="text-yellow-500 text-xs font-black bg-yellow-500/10 px-2 py-1 rounded-md">★ ${show.avg_rating}</span>
                         </div>
-                        <h3 class="font-bold text-lg leading-snug mb-3 group-hover:text-blue-400 transition-colors">${show.title}</h3>
-                        <p class="text-gray-500 text-[11px] font-medium uppercase tracking-wider mb-8">${show.venue || 'The Great Beyond'}</p>
+                        <h3 class="font-bold text-lg leading-snug mb-3 group-hover:text-red-500 transition-colors">${show.title}</h3>
+                        <p class="text-gray-500 text-[11px] font-medium uppercase tracking-wider mb-8">${show.venue || 'Unknown Venue'}</p>
                     </div>
                     <button onclick="playShow('${show.identifier}')" 
-                            class="w-full bg-white/5 hover:bg-red-600 text-white font-black py-3 rounded-2xl transition-all duration-300 uppercase text-xs tracking-[0.2em] border border-white/10 hover:border-red-600">
-                            Stream Now
+                            class="w-full bg-white/5 hover:bg-blue-600 text-white font-black py-3 rounded-2xl transition-all duration-300 uppercase text-[10px] tracking-[0.2em] border border-white/10">
+                            Listen Now
                     </button>
                 </div>
             `).join('');
@@ -112,7 +113,7 @@
         function playShow(id) {
             const container = document.getElementById('player-container');
             const frame = document.getElementById('player-iframe');
-            frame.innerHTML = `<iframe src="https://archive.org/embed/${id}&playlist=1" width="100%" height="120" frameborder="0"></iframe>`;
+            frame.innerHTML = `<iframe src="https://archive.org/embed/${id}&playlist=1" width="100%" height="150" frameborder="0"></iframe>`;
             container.classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
