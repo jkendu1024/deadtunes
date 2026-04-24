@@ -9,14 +9,17 @@
         .glass { background: rgba(31, 41, 55, 0.7); backdrop-filter: blur(10px); }
         .dead-gradient { background: linear-gradient(90deg, #ef4444, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         body { background-color: #000; background-image: radial-gradient(circle at center, #111 0%, #000 100%); }
-        .counter-glow { text-shadow: 0 0 10px rgba(239, 68, 68, 0.8); }
+        /* Custom scrollbar for that vault feel */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #ef4444; border-radius: 10px; }
     </style>
 </head>
 <body class="text-gray-100 min-h-screen font-sans">
 
     <div id="player-container" class="sticky top-0 z-50 w-full bg-gray-900 border-b border-red-900 hidden shadow-2xl">
         <div class="max-w-6xl mx-auto p-2 flex flex-col">
-            <button onclick="closePlayer()" class="self-end text-[10px] text-gray-500 hover:text-white mb-1 uppercase tracking-widest font-bold">✕ Close Player</button>
+            <button onclick="closePlayer()" class="self-end text-[10px] text-gray-500 hover:text-white mb-1 uppercase tracking-widest font-bold px-2">✕ Close Player</button>
             <div id="player-iframe"></div>
         </div>
     </div>
@@ -32,33 +35,34 @@
                 <h1 class="text-6xl font-black italic dead-gradient tracking-tighter leading-none">DEADTUNES</h1>
                 <p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.3em] mt-3">High Fidelity Soundboards</p>
                 
-                <div class="mt-6 flex flex-col items-center gap-2">
-    <p class="text-[9px] text-gray-600 uppercase tracking-[0.2em] font-bold italic">Total Travelers</p>
-    <div class="bg-gray-900 px-4 py-2 rounded-lg border border-gray-800 shadow-inner">
-        <img src="https://v-badge.herokuapp.com/badge.svg?entity=jkendu1024_deadtunes&label=Vault%20Entry&color=red" 
-             alt="Visitor Count"
-             class="h-5 opacity-80 brightness-125">
-    </div>
-</div>
+                <div class="mt-6 flex flex-col items-center gap-1">
+                    <p class="text-[9px] text-gray-600 uppercase tracking-[0.2em] font-bold italic">Total Travelers</p>
+                    <div class="bg-gray-900 px-4 py-2 rounded-lg border border-gray-800 shadow-inner min-w-[120px] flex justify-center">
+                        <img src="https://count.getloli.com/get/@jkendu1024_deadtunes?theme=rule734" 
+                             alt="Visitor Count" 
+                             class="h-6 opacity-90 brightness-125"
+                             onerror="this.parentElement.innerHTML='<span class=\'text-red-600 font-mono text-xs uppercase tracking-widest\'>Vault Connected</span>'">
+                    </div>
+                </div>
             </div>
 
             <div class="flex gap-2 w-full max-w-md mt-4">
                 <input type="text" id="searchInput" placeholder="Year or Venue (e.g. 1977)" 
-                       class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-3 w-full focus:outline-none focus:border-red-600 transition-all text-white">
+                       class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-3 w-full focus:outline-none focus:border-red-600 transition-all text-white placeholder-gray-600">
                 <button onclick="fetchShows()" class="bg-red-600 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-black transition-all duration-300 uppercase text-sm">Search</button>
             </div>
         </header>
 
         <div id="loading" class="flex flex-col items-center py-20">
-            <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-red-500 mb-4"></div>
-            <p class="text-gray-600 text-xs uppercase tracking-[0.3em]">Opening the Vault...</p>
+            <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-red-500 mb-4 border-r-2 border-r-transparent"></div>
+            <p class="text-gray-600 text-xs uppercase tracking-[0.3em]">Searching the Vault...</p>
         </div>
 
         <div id="results" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
     </div>
 
     <script>
-        
+        // MAIN FETCH FUNCTION
         async function fetchShows() {
             const searchTerm = document.getElementById('searchInput').value;
             const container = document.getElementById('results');
@@ -67,6 +71,7 @@
             loading.classList.remove('hidden');
             container.innerHTML = '';
 
+            // Query Logic: Dead + Soundboard + 4-5 Stars
             let query = 'collection:(GratefulDead) AND avg_rating:[4 TO 5] AND mediatype:(etree) AND subject:(soundboard)';
             if (searchTerm) query += ` AND (title:(${searchTerm}) OR year:(${searchTerm}) OR venue:(${searchTerm}))`;
 
@@ -77,16 +82,17 @@
                 const data = await response.json();
                 displayShows(data.response.docs);
             } catch (err) {
-                loading.innerHTML = "<p class='text-red-500 uppercase tracking-widest font-bold font-mono'>Vault Connection Error</p>";
+                loading.innerHTML = "<p class='text-red-500 uppercase tracking-widest font-bold font-mono text-xs'>Archive API Offline - Try Again Later</p>";
             }
         }
 
+        // RENDER FUNCTION
         function displayShows(shows) {
             const container = document.getElementById('results');
             document.getElementById('loading').classList.add('hidden');
 
             if (!shows || shows.length === 0) {
-                container.innerHTML = '<p class="col-span-full text-center text-gray-600 py-10 text-lg uppercase tracking-widest font-bold font-mono italic">No 5-Star shows found.</p>';
+                container.innerHTML = '<p class="col-span-full text-center text-gray-600 py-10 text-lg uppercase tracking-widest font-bold font-mono italic">Nothing found in the vault.</p>';
                 return;
             }
 
@@ -95,23 +101,27 @@
                     <div>
                         <div class="flex justify-between items-center mb-4">
                             <span class="text-red-500 font-bold font-mono text-sm tracking-tighter">${show.date || ''}</span>
-                            <span class="text-yellow-500 text-xs font-black bg-yellow-500/10 px-2 py-1 rounded-md">★ ${show.avg_rating}</span>
+                            <span class="text-yellow-500 text-xs font-black bg-yellow-500/10 px-2 py-1 rounded-md border border-yellow-500/20 tracking-tighter">★ ${show.avg_rating}</span>
                         </div>
                         <h3 class="font-bold text-lg leading-snug mb-3 group-hover:text-red-500 transition-colors">${show.title}</h3>
-                        <p class="text-gray-400 text-[11px] font-medium uppercase tracking-wider mb-8">${show.venue || 'Unknown Venue'}</p>
+                        <p class="text-gray-400 text-[11px] font-medium uppercase tracking-wider mb-8 opacity-70">${show.venue || 'Unknown Venue'}</p>
                     </div>
                     <button onclick="playShow('${show.identifier}')" 
                             class="w-full bg-white/5 hover:bg-blue-600 text-white font-black py-3 rounded-2xl transition-all duration-300 uppercase text-[10px] tracking-[0.2em] border border-white/10 hover:border-blue-600">
-                            Stream Now
+                            Listen Now
                     </button>
                 </div>
             `).join('');
         }
 
+        // PLAYER LOGIC
         function playShow(id) {
             const container = document.getElementById('player-container');
             const frame = document.getElementById('player-iframe');
-            frame.innerHTML = `<iframe src="https://archive.org/embed/${id}&playlist=1" width="100%" height="150" frameborder="0"></iframe>`;
+            
+            // Injects the IA embedded player
+            frame.innerHTML = `<iframe src="https://archive.org/embed/${id}&playlist=1&autoplay=1" width="100%" height="150" frameborder="0"></iframe>`;
+            
             container.classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -121,8 +131,7 @@
             document.getElementById('player-iframe').innerHTML = '';
         }
 
-        // Run
-        getCount();
+        // INITIAL BOOT
         fetchShows();
     </script>
 </body>
