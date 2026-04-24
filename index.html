@@ -23,23 +23,24 @@
     <div class="max-w-6xl mx-auto px-4 py-8">
         <header class="flex flex-col items-center mb-12 gap-4 text-center">
             
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://www.dead.net" 
-                 id="stealie"
+            <img src="https://peaceproject.com/wp-content/uploads/LS455.jpg" 
                  alt="Steal Your Face" 
-                 class="w-32 h-32 md:w-44 md:h-44 drop-shadow-[0_0_25px_rgba(239,68,68,0.3)] transition-transform hover:rotate-12 duration-500 rounded-full">
+                 class="w-32 h-32 md:w-44 md:h-44 drop-shadow-[0_0_25px_rgba(239,68,68,0.4)] transition-transform hover:scale-105 duration-500 rounded-full border-4 border-gray-900">
             
             <div class="mt-2">
                 <h1 class="text-6xl font-black italic dead-gradient tracking-tighter leading-none">DEADTUNES</h1>
-                <p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.3em] mt-3">The Best of Archive.org</p>
+                <p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.3em] mt-3">High Fidelity Soundboards</p>
                 
                 <div class="mt-6 flex flex-col items-center gap-1">
                     <p class="text-[9px] text-gray-600 uppercase tracking-[0.2em] font-bold italic">Total Travelers</p>
-                    <div id="count" class="text-xl font-mono text-red-600 tracking-widest bg-gray-900 px-4 py-1 rounded-md border border-gray-800 shadow-inner">00000</div>
+                    <div class="bg-gray-900 px-4 py-1 rounded-md border border-gray-800 shadow-inner">
+                        <img src="https://www.cutercounter.com/hits.php?id=gvxpako&nd=5&style=1" border="0" alt="visitor counter" class="opacity-80 grayscale brightness-200 h-6">
+                    </div>
                 </div>
             </div>
 
             <div class="flex gap-2 w-full max-w-md mt-4">
-                <input type="text" id="searchInput" placeholder="Year or Venue (e.g. 1972)" 
+                <input type="text" id="searchInput" placeholder="Year or Venue (e.g. 1977)" 
                        class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-3 w-full focus:outline-none focus:border-red-600 transition-all text-white">
                 <button onclick="fetchShows()" class="bg-red-600 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-black transition-all duration-300 uppercase text-sm">Search</button>
             </div>
@@ -54,22 +55,6 @@
     </div>
 
     <script>
-        // Update the Stealie with a reliable source once DOM loads
-        document.getElementById('stealie').src = "https://raw.githubusercontent.com/jakejarvis/grateful-dead-tapers/master/public/apple-touch-icon.png";
-
-        // COUNTER LOGIC
-        async function updateCounter() {
-            try {
-                // Using a free, simple hit counter API
-                const res = await fetch('https://api.countapi.xyz/hit/jkendu1024-deadtunes/visits');
-                const data = await res.json();
-                document.getElementById('count').innerText = data.value.toString().padStart(5, '0');
-            } catch (e) {
-                // Fallback if API is down so it doesn't look broken
-                document.getElementById('count').innerText = "00420"; 
-            }
-        }
-
         async function fetchShows() {
             const searchTerm = document.getElementById('searchInput').value;
             const container = document.getElementById('results');
@@ -109,7 +94,7 @@
                             <span class="text-yellow-500 text-xs font-black bg-yellow-500/10 px-2 py-1 rounded-md">★ ${show.avg_rating}</span>
                         </div>
                         <h3 class="font-bold text-lg leading-snug mb-3 group-hover:text-red-500 transition-colors">${show.title}</h3>
-                        <p class="text-gray-500 text-[11px] font-medium uppercase tracking-wider mb-8 text-left">${show.venue || 'Unknown Venue'}</p>
+                        <p class="text-gray-400 text-[11px] font-medium uppercase tracking-wider mb-8 text-left">${show.venue || 'Unknown Venue'}</p>
                     </div>
                     <button onclick="playShow('${show.identifier}')" 
                             class="w-full bg-white/5 hover:bg-blue-600 text-white font-black py-3 rounded-2xl transition-all duration-300 uppercase text-[10px] tracking-[0.2em] border border-white/10">
@@ -132,8 +117,6 @@
             document.getElementById('player-iframe').innerHTML = '';
         }
 
-        // Initialize
-        updateCounter();
         fetchShows();
     </script>
 </body>
