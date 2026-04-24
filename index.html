@@ -12,37 +12,41 @@
 </head>
 <body class="bg-black text-gray-100 min-h-screen">
 
-    <div id="player-container" class="sticky top-0 z-50 w-full bg-gray-900 border-b border-red-900 hidden">
+    <div id="player-container" class="sticky top-0 z-50 w-full bg-gray-900 border-b border-red-900 hidden shadow-2xl">
         <div class="max-w-6xl mx-auto p-2 flex flex-col">
-            <button onclick="closePlayer()" class="self-end text-xs text-gray-400 hover:text-white mb-1 uppercase">✕ Close</button>
+            <button onclick="closePlayer()" class="self-end text-[10px] text-gray-500 hover:text-white mb-1 uppercase tracking-widest font-bold">✕ Close Player</button>
             <div id="player-iframe"></div>
         </div>
     </div>
 
     <div class="max-w-6xl mx-auto px-4 py-8">
-        <header class="flex flex-col items-center mb-12 gap-6 text-center">
-            <img src="https://www.gratefuldeadshop.com/cdn/shop/files/SYF_Logo_700x.png" alt="Steal Your Face" class="w-32 h-32 md:w-48 md:h-48 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)]">
+        <header class="flex flex-col items-center mb-12 gap-4 text-center">
             
-            <div>
-                <h1 class="text-6xl font-black italic dead-gradient tracking-tighter">DEADTUNES</h1>
-                <p class="text-gray-400 font-medium font-mono text-sm uppercase tracking-widest mt-2">4 & 5 Star Soundboards Only</p>
+            <img src="https://upload.wikimedia.org/wikipedia/en/0/03/Grateful_Dead_-_Steal_Your_Face.png" 
+                 alt="Steal Your Face" 
+                 class="w-32 h-32 md:w-44 md:h-44 drop-shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-transform hover:scale-110 duration-500">
+            
+            <div class="mt-2">
+                <h1 class="text-6xl font-black italic dead-gradient tracking-tighter leading-none">DEADTUNES</h1>
+                <p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.3em] mt-3">4 & 5 Star Soundboards Only</p>
                 
-                <div class="mt-4 flex flex-col items-center gap-1">
-                    <p class="text-[10px] text-gray-600 uppercase tracking-widest">Total Travelers</p>
-                    <img src="https://hitwebcounter.com/counter/counter.php?page=jkendu1024_deadtunes&style=0005&nbdigits=5&type=page&initCount=0" title="Free Counter" Alt="web counter" border="0" class="opacity-70 grayscale hover:grayscale-0 transition">
+                <div class="mt-6 flex flex-col items-center gap-2">
+                    <p class="text-[9px] text-gray-600 uppercase tracking-[0.2em] font-bold">Total Travelers</p>
+                    <img src="https://hitwebcounter.com/counter/counter.php?page=jk_deadtunes_v1&style=0005&nbdigits=5&type=page&initCount=0" 
+                         title="Free Counter" Alt="web counter" border="0" class="opacity-60 grayscale brightness-150">
                 </div>
             </div>
 
-            <div class="flex gap-2 w-full max-w-md">
-                <input type="text" id="searchInput" placeholder="Year or Venue (e.g. 1977)" 
-                       class="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 w-full focus:outline-none focus:border-red-500">
-                <button onclick="fetchShows()" class="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-lg font-bold transition">Search</button>
+            <div class="flex gap-2 w-full max-w-md mt-4">
+                <input type="text" id="searchInput" placeholder="Year or Venue (e.g. 1972)" 
+                       class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-3 w-full focus:outline-none focus:border-blue-500 transition-colors">
+                <button onclick="fetchShows()" class="bg-red-600 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-black transition-all duration-300 uppercase text-sm tracking-tighter">Search</button>
             </div>
         </header>
 
         <div id="loading" class="flex flex-col items-center py-20">
-            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500 mb-4"></div>
-            <p class="text-gray-500 uppercase tracking-tighter">Searching the Vault...</p>
+            <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-red-500 mb-4"></div>
+            <p class="text-gray-600 text-xs uppercase tracking-[0.3em]">Opening the Vault...</p>
         </div>
 
         <div id="results" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
@@ -83,22 +87,22 @@
             document.getElementById('loading').classList.add('hidden');
 
             if (shows.length === 0) {
-                container.innerHTML = '<p class="col-span-full text-center text-gray-500 py-10 text-xl">No high-rated shows found.</p>';
+                container.innerHTML = '<p class="col-span-full text-center text-gray-600 py-10 text-lg uppercase tracking-widest font-bold">No shows found.</p>';
                 return;
             }
 
             container.innerHTML = shows.map(show => `
-                <div class="glass p-6 rounded-2xl border border-gray-800 hover:border-red-600 transition-all flex flex-col justify-between shadow-2xl">
+                <div class="glass p-7 rounded-3xl border border-gray-800 hover:border-blue-900/50 transition-all duration-500 flex flex-col justify-between shadow-2xl group">
                     <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="text-red-500 font-bold font-mono">${show.date || ''}</span>
-                            <span class="text-yellow-400 text-sm">★ ${show.avg_rating}</span>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-red-500 font-bold font-mono text-sm">${show.date || ''}</span>
+                            <span class="text-yellow-500 text-xs font-black bg-yellow-500/10 px-2 py-1 rounded-md tracking-tighter">★ ${show.avg_rating}</span>
                         </div>
-                        <h3 class="font-bold text-lg leading-tight mb-2">${show.title}</h3>
-                        <p class="text-gray-400 text-xs italic mb-6">${show.venue || 'Unknown Venue'}</p>
+                        <h3 class="font-bold text-lg leading-snug mb-3 group-hover:text-blue-400 transition-colors">${show.title}</h3>
+                        <p class="text-gray-500 text-[11px] font-medium uppercase tracking-wider mb-8">${show.venue || 'The Great Beyond'}</p>
                     </div>
                     <button onclick="playShow('${show.identifier}')" 
-                            class="w-full bg-blue-600 hover:bg-red-600 text-white font-bold py-2 rounded-lg transition uppercase text-sm">
+                            class="w-full bg-white/5 hover:bg-red-600 text-white font-black py-3 rounded-2xl transition-all duration-300 uppercase text-xs tracking-[0.2em] border border-white/10 hover:border-red-600">
                             Stream Now
                     </button>
                 </div>
