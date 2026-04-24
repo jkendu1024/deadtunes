@@ -63,7 +63,8 @@
         const BATCH_SIZE = 12;
 
         async function handleSearch() {
-            const searchTerm = document.getElementById('searchInput').value;
+            const searchInput = document.getElementById('searchInput');
+            const searchTerm = searchInput.value.trim();
             const container = document.getElementById('results');
             const loading = document.getElementById('loading');
             const loadMoreBtn = document.getElementById('loadMoreContainer');
@@ -74,63 +75,39 @@
             allShows = [];
             displayedCount = 0;
 
-async function handleSearch() {
-    const searchTerm = document.getElementById('searchInput').value.trim();
-    const container = document.getElementById('results');
-    const loading = document.getElementById('loading');
-    const loadMoreBtn = document.getElementById('loadMoreContainer');
-    
-    loading.classList.remove('hidden');
-    loadMoreBtn.classList.add('hidden');
-    container.innerHTML = '';
-    allShows = [];
-    displayedCount = 0;
-
-    // Logic: If search is exactly 4 digits, search the DATE field specifically
-    let query = 'collection:(GratefulDead) AND avg_rating:[4 TO 5] AND subject:(soundboard)';
-    
-    if (/^\d{4}$/.test(searchTerm)) {
-        // If user typed a 4-digit year, lock the search to that year's date range
-        query += ` AND date:[${searchTerm}-01-01 TO ${searchTerm}-12-31]`;
-    } else if (searchTerm) {
-        // Otherwise, do a general search for the venue/term
-        query += ` AND (${searchTerm})`;
-    }
-
-    const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=date+asc&rows=200&output=json`;
-
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        const uniqueShowsMap = {};
-        data.response.docs.forEach(item => {
-            if (!item.date) return;
-            const dateOnly = item.date.split('T')[0];
+            // Logic: If search is exactly 4 digits, search the DATE field specifically
+            let query = 'collection:(GratefulDead) AND avg_rating:[4 TO 5] AND subject:(soundboard)';
             
-            // Deduplication: Pick the version with most downloads
-            if (!uniqueShowsMap[dateOnly] || item.downloads > uniqueShowsMap[dateOnly].downloads) {
-                uniqueShowsMap[dateOnly] = item;
+            if (/^\d{4}$/.test(searchTerm)) {
+                query += ` AND date:[${searchTerm}-01-01 TO ${searchTerm}-12-31]`;
+            } else if (searchTerm) {
+                query += ` AND (${searchTerm})`;
             }
-        });
 
-        // Strict Chronological Sort (Jan -> Dec)
-        allShows = Object.values(uniqueShowsMap).sort((a, b) => new Date(a.date) - new Date(b.date));
-        
-        loading.classList.add('hidden');
-        renderNextBatch();
-    } catch (err) {
-        loading.innerHTML = "<p class='text-red-500 font-bold uppercase text-xs'>Vault Timeout - Try Again</p>";
-    }
-}
+            const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=date+asc&rows=200&output=json`;
 
-                // Sort array strictly by date (Jan -> Dec)
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                const uniqueShowsMap = {};
+                data.response.docs.forEach(item => {
+                    if (!item.date) return;
+                    const dateOnly = item.date.split('T')[0];
+                    
+                    // Deduplication: Pick the version with most downloads
+                    if (!uniqueShowsMap[dateOnly] || item.downloads > uniqueShowsMap[dateOnly].downloads) {
+                        uniqueShowsMap[dateOnly] = item;
+                    }
+                });
+
+                // Strict Chronological Sort (Jan -> Dec)
                 allShows = Object.values(uniqueShowsMap).sort((a, b) => new Date(a.date) - new Date(b.date));
                 
                 loading.classList.add('hidden');
                 renderNextBatch();
             } catch (err) {
-                loading.innerHTML = "<p class='text-red-500 font-bold'>Archive API Limit Reached. Wait 1 min.</p>";
+                loading.innerHTML = "<p class='text-red-500 font-bold uppercase text-xs'>Vault Timeout - Try Again</p>";
             }
         }
 
@@ -180,7 +157,7 @@ async function handleSearch() {
             document.getElementById('player-iframe').innerHTML = '';
         }
 
-        // Initial Load (Default Search)
+        // Initial Load
         handleSearch();
     </script>
 </body>
