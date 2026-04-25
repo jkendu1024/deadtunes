@@ -9,7 +9,7 @@
         .glass { background: rgba(31, 41, 55, 0.7); backdrop-filter: blur(10px); }
         .dead-gradient { background: linear-gradient(90deg, #ef4444, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         body { background-color: #000; background-image: radial-gradient(circle at center, #111 0%, #000 100%); }
-        .gold-glow { box-shadow: 0 0 25px rgba(234, 179, 8, 0.2); border: 1px solid rgba(234, 179, 8, 0.4); }
+        .gold-glow { box-shadow: 0 0 30px rgba(234, 179, 8, 0.25); border: 1px solid rgba(234, 179, 8, 0.5); }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #ef4444; border-radius: 10px; }
     </style>
@@ -29,12 +29,12 @@
             
             <div class="mt-2">
                 <h1 class="text-6xl font-black italic dead-gradient tracking-tighter leading-none text-red-600">DEADTUNES</h1>
-                <p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.3em] mt-3 font-semibold">High Fidelity Soundboard Vault</p>
+                <p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.3em] mt-3">High Fidelity Soundboard Vault</p>
                 
                 <div class="mt-6 flex flex-col items-center gap-1">
                     <p class="text-[9px] text-gray-600 uppercase tracking-[0.2em] font-bold italic">Unique Travelers</p>
                     <div class="bg-gray-900/80 px-4 py-2 rounded-xl border border-gray-800 flex justify-center shadow-inner">
-                        <img src="https://count.getloli.com/get/@jk_deadtunes_unique?theme=asoul&type=uv" alt="Unique Visitors" class="h-10 opacity-90 brightness-110">
+                        <img src="https://count.getloli.com/get/@jk_deadtunes_vFinalFix?theme=asoul&type=uv" alt="Unique Visitors" class="h-10 opacity-90 brightness-110">
                     </div>
                 </div>
             </div>
@@ -46,13 +46,13 @@
         </header>
 
         <div id="featured-container" class="mb-16">
-            <h2 id="featured-title" class="text-center text-xs font-black uppercase tracking-[0.4em] text-yellow-500 mb-6">Checking the Daily Vault...</h2>
+            <h2 id="featured-title" class="text-center text-xs font-black uppercase tracking-[0.4em] text-yellow-500 mb-6 italic">Accessing the Vault...</h2>
             <div id="featured-result" class="max-w-md mx-auto"></div>
         </div>
 
         <div id="loading" class="hidden flex flex-col items-center py-20">
             <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-red-500 mb-4 border-r-transparent"></div>
-            <p class="text-gray-600 text-xs uppercase tracking-[0.3em]">Searching history...</p>
+            <p class="text-gray-600 text-xs uppercase tracking-[0.3em]">Opening the Vault...</p>
         </div>
 
         <div id="results" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
@@ -71,39 +71,39 @@
             const month = String(today.getMonth() + 1).padStart(2, '0');
             const day = String(today.getDate()).padStart(2, '0');
             
-            // First try: Exact match for today across all years
-            const query = `collection:(GratefulDead) AND date:*-${month}-${day} AND avg_rating:[4 TO 5] AND subject:(soundboard)`;
-            const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=downloads+desc&rows=1&output=json`;
+            // Try "On This Day"
+            const query = `collection:(GratefulDead) AND date:*-${month}-${day} AND mediatype:(etree) AND subject:(soundboard)`;
+            const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=downloads+desc&rows=5&output=json`;
 
             try {
                 const response = await fetch(url);
                 const data = await response.json();
-                const container = document.getElementById('featured-result');
-                const title = document.getElementById('featured-title');
-
+                
                 if (data.response.docs.length > 0) {
-                    title.innerText = "✨ On This Day in History ✨";
+                    document.getElementById('featured-title').innerText = "✨ On This Day in History ✨";
                     renderFeaturedCard(data.response.docs[0]);
                 } else {
-                    // Fallback: If no show today, show the highest rated "All Time" choice
-                    title.innerText = "⭐ The Vault's Top Choice ⭐";
+                    // Force Fallback if OTD is empty
                     fetchTopChoice();
                 }
             } catch (e) {
-                document.getElementById('featured-container').classList.add('hidden');
+                fetchTopChoice();
             }
         }
 
         async function fetchTopChoice() {
-            const query = `collection:(GratefulDead) AND avg_rating:5 AND subject:(soundboard)`;
-            const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=downloads+desc&rows=50&output=json`;
+            // Pull a guaranteed heavy hitter (e.g., Cornell 77 or Veneta 72)
+            const query = `collection:(GratefulDead) AND avg_rating:5 AND downloads:[10000 TO 1000000]`;
+            const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=downloads+desc&rows=20&output=json`;
             try {
                 const res = await fetch(url);
                 const data = await res.json();
-                // Randomly pick one of the top 50 most downloaded 5-star shows
+                document.getElementById('featured-title').innerText = "⭐ The Vault's Top Choice ⭐";
                 const randomShow = data.response.docs[Math.floor(Math.random() * data.response.docs.length)];
                 renderFeaturedCard(randomShow);
-            } catch (e) {}
+            } catch (e) {
+                document.getElementById('featured-container').classList.add('hidden');
+            }
         }
 
         function renderFeaturedCard(show) {
@@ -111,7 +111,7 @@
                 <div class="glass p-8 rounded-3xl gold-glow flex flex-col items-center text-center">
                     <span class="text-yellow-500 font-mono text-sm font-bold mb-2 uppercase tracking-tighter">${show.date ? show.date.split('T')[0] : 'Legendary'}</span>
                     <h3 class="font-black text-xl leading-tight mb-4 text-white">${show.title}</h3>
-                    <p class="text-gray-400 text-xs uppercase tracking-widest mb-6">${show.venue || 'Unknown Venue'}</p>
+                    <p class="text-gray-400 text-[10px] uppercase tracking-widest mb-6">${show.venue || 'The Great Beyond'}</p>
                     <button onclick="playShow('${show.identifier}')" class="bg-yellow-600 hover:bg-yellow-500 text-black font-black py-3 px-8 rounded-2xl transition-all uppercase text-xs tracking-widest">
                         Listen Now
                     </button>
@@ -165,7 +165,7 @@
             const nextBatch = allShows.slice(displayedCount, displayedCount + BATCH_SIZE);
             
             if (nextBatch.length === 0 && displayedCount === 0) {
-                container.innerHTML = '<p class="col-span-full text-center text-gray-600 py-10 uppercase tracking-widest text-xs font-bold font-mono">The Vault is quiet for this search.</p>';
+                container.innerHTML = '<p class="col-span-full text-center text-gray-600 py-10 uppercase tracking-widest text-xs font-bold">The Vault is quiet for this search.</p>';
                 return;
             }
 
@@ -174,7 +174,7 @@
                     <div>
                         <div class="flex justify-between items-center mb-4 text-[10px] font-mono">
                             <span class="text-red-500 font-bold">${show.date ? show.date.split('T')[0] : 'N/A'}</span>
-                            <span class="text-yellow-500 font-black">★ ${show.avg_rating}</span>
+                            <span class="text-yellow-500 font-black">★ ${show.avg_rating || '5'}</span>
                         </div>
                         <h3 class="font-bold text-md leading-tight mb-2 line-clamp-2">${show.title}</h3>
                         <p class="text-gray-500 text-[10px] uppercase tracking-wider mb-6 opacity-60">${show.venue || 'Various Venues'}</p>
