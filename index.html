@@ -134,31 +134,40 @@ async function handleSearch() {
     allShows = [];
     displayedCount = 0;
 
-    // Base query for high-quality SBDs
-    let query = 'collection:(GratefulDead) AND avg_rating:[4 TO 5] AND subject:(soundboard)';
+    // Default high-fidelity filter
+    let ratingFilter = 'AND avg_rating:[4 TO 5]';
+    let query = 'collection:(GratefulDead) AND subject:(soundboard)';
     
-    // Extract year and keywords
+    // SMART PARSING
     const yearMatch = searchTerm.match(/\b\d{4}\b/);
+    const dateMatch = searchTerm.match(/(\d{1,2})[\/\- ](\d{1,2})[\/\- ](\d{4})/);
     const year = yearMatch ? yearMatch[0] : null;
-    const cleanSearch = searchTerm.replace(/\b\d{4}\b/, '').trim();
+    let cleanSearch = searchTerm.replace(/\b\d{4}\b/, '').trim();
 
-    if (year) {
+    // If searching a specific full date (like 10/17/1984), REMOVE the rating filter
+    if (dateMatch) {
+        const m = dateMatch[1].padStart(2, '0');
+        const d = dateMatch[2].padStart(2, '0');
+        const y = dateMatch[3];
+        query += ` AND date:${y}-${m}-${d}`;
+        ratingFilter = ''; // Let the user find their specific show regardless of rating
+        cleanSearch = ''; 
+    } else if (year) {
         query += ` AND date:[${year}-01-01 TO ${year}-12-31]`;
     }
     
     if (cleanSearch) {
-        // We use a "fuzzy" search here so 'Hampton' matches 'Hampton Coliseum' 
-        // and also checks the description/title fields.
         query += ` AND (title:"${cleanSearch}"~ OR description:"${cleanSearch}"~ OR venue:"${cleanSearch}"~)`;
     }
 
-    const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=date+asc&rows=150&output=json`;
+    const fullQuery = `${query} ${ratingFilter}`;
+    const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(fullQuery)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=date+asc&rows=150&output=json`;
 
     try {
         const response = await fetch(url);
         const data = await response.json();
-        
         const uniqueShowsMap = {};
+        
         data.response.docs.forEach(item => {
             if (!item.date) return;
             const dateOnly = item.date.split('T')[0];
