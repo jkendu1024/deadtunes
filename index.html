@@ -1,49 +1,69 @@
-async function handleSearch() {
-    const searchTerm = document.getElementById('searchInput').value.trim();
-    const container = document.getElementById('results');
-    const loading = document.getElementById('loading');
-    const loadMoreBtn = document.getElementById('loadMoreContainer');
-    
-    loading.classList.remove('hidden');
-    loadMoreBtn.classList.add('hidden');
-    container.innerHTML = '';
-    allShows = [];
-    displayedCount = 0;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeadTunes | 5-Star SBDs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .glass { background: rgba(31, 41, 55, 0.7); backdrop-filter: blur(10px); }
+        .dead-gradient { background: linear-gradient(90deg, #ef4444, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        body { background-color: #000; background-image: radial-gradient(circle at center, #111 0%, #000 100%); }
+        .gold-glow { box-shadow: 0 0 30px rgba(234, 179, 8, 0.25); border: 1px solid rgba(234, 179, 8, 0.5); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #ef4444; border-radius: 10px; }
+    </style>
+</head>
+<body class="text-gray-100 min-h-screen font-sans">
 
-    let query = 'collection:(GratefulDead) AND avg_rating:[4 TO 5] AND subject:(soundboard)';
-    
-    // SMART PARSING: Look for a 4-digit year anywhere in the search
-    const yearMatch = searchTerm.match(/\b\d{4}\b/);
-    const year = yearMatch ? yearMatch[0] : null;
-    const cleanSearch = searchTerm.replace(/\b\d{4}\b/, '').trim();
+    <div id="player-container" class="sticky top-0 z-50 w-full bg-gray-900 border-b border-red-900 hidden shadow-2xl">
+        <div class="max-w-6xl mx-auto p-2 flex flex-col">
+            <button onclick="closePlayer()" class="self-end text-[10px] text-gray-500 hover:text-white mb-1 uppercase tracking-widest font-bold px-2">✕ Close Player</button>
+            <div id="player-iframe"></div>
+        </div>
+    </div>
 
-    if (year) {
-        // Lock the date range to that year
-        query += ` AND date:[${year}-01-01 TO ${year}-12-31]`;
-    }
-    
-    if (cleanSearch) {
-        // Search the remaining words (like "Hampton") in the title/venue fields
-        query += ` AND ("${cleanSearch}")`;
-    }
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <header class="flex flex-col items-center mb-12 gap-4 text-center">
+            <img src="https://peaceproject.com/wp-content/uploads/LS455.jpg" alt="Stealie" class="w-32 h-32 md:w-44 md:h-44 drop-shadow-[0_0_25px_rgba(239,68,68,0.4)] rounded-full border-4 border-gray-900">
+            
+            <div class="mt-2">
+                <h1 class="text-6xl font-black italic dead-gradient tracking-tighter leading-none text-red-600 uppercase">DEADTUNES</h1>
+                <p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.3em] mt-3">High Fidelity Soundboard Vault</p>
+                
+                <div class="mt-6 flex flex-col items-center gap-1">
+                    <p class="text-[9px] text-gray-600 uppercase tracking-[0.2em] font-bold italic">Unique Travelers</p>
+                    <div class="bg-gray-900/80 px-4 py-2 rounded-xl border border-gray-800 flex justify-center shadow-inner">
+                        <img src="https://count.getloli.com/get/@jk_deadtunes_final_v2?theme=asoul&type=uv" alt="Unique Visitors" class="h-10 opacity-90 brightness-110">
+                    </div>
+                </div>
+            </div>
 
-    const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=date+asc&rows=200&output=json`;
+            <div class="flex gap-2 w-full max-w-md mt-4">
+                <input type="text" id="searchInput" placeholder="Search (e.g., Hampton 1988)" class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-3 w-full focus:outline-none focus:border-red-600 transition-all text-white placeholder-gray-600">
+                <button onclick="handleSearch()" class="bg-red-600 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-black transition-all duration-300 uppercase text-sm">Search</button>
+            </div>
+        </header>
 
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-        const uniqueShowsMap = {};
-        data.response.docs.forEach(item => {
-            if (!item.date) return;
-            const dateOnly = item.date.split('T')[0];
-            if (!uniqueShowsMap[dateOnly] || item.downloads > uniqueShowsMap[dateOnly].downloads) {
-                uniqueShowsMap[dateOnly] = item;
-            }
-        });
-        allShows = Object.values(uniqueShowsMap).sort((a, b) => new Date(a.date) - new Date(b.date));
-        loading.classList.add('hidden');
-        renderNextBatch();
-    } catch (err) {
-        loading.innerHTML = "<p class='text-red-500 font-bold uppercase text-xs'>Vault Timeout - Try Again</p>";
-    }
-}
+        <div id="featured-container" class="mb-16">
+            <h2 id="featured-title" class="text-center text-xs font-black uppercase tracking-[0.4em] text-yellow-500 mb-6 italic">Accessing the Vault...</h2>
+            <div id="featured-result" class="max-w-md mx-auto"></div>
+        </div>
+
+        <div id="loading" class="hidden flex flex-col items-center py-20">
+            <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-red-500 mb-4 border-r-transparent"></div>
+            <p class="text-gray-600 text-xs uppercase tracking-[0.3em]">Opening the Vault...</p>
+        </div>
+
+        <div id="results" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+        
+        <div id="loadMoreContainer" class="flex justify-center mt-12 mb-20 hidden">
+            <button onclick="renderNextBatch()" class="border border-red-600 text-red-500 hover:bg-red-600 hover:text-white px-10 py-3 rounded-full font-bold transition-all uppercase tracking-widest text-xs shadow-lg">Load More Shows</button>
+        </div>
+    </div>
+
+    <script>
+        let allShows = [];
+        let displayedCount = 0;
+        const B
