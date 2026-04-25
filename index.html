@@ -120,64 +120,74 @@
             `;
         }
 
-        async function handleSearch() {
-            const searchTerm = document.getElementById('searchInput').value.trim();
-            const container = document.getElementById('results');
-            const loading = document.getElementById('loading');
-            const loadMoreBtn = document.getElementById('loadMoreContainer');
-            
-            if (!searchTerm) return;
+async function handleSearch() {
+    const searchTerm = document.getElementById('searchInput').value.trim();
+    const container = document.getElementById('results');
+    const loading = document.getElementById('loading');
+    const loadMoreBtn = document.getElementById('loadMoreContainer');
+    
+    if (!searchTerm) return;
 
-            loading.classList.remove('hidden');
-            loadMoreBtn.classList.add('hidden');
-            container.innerHTML = '';
-            allShows = [];
-            displayedCount = 0;
+    loading.classList.remove('hidden');
+    loadMoreBtn.classList.add('hidden');
+    container.innerHTML = '';
+    allShows = [];
+    displayedCount = 0;
 
-            let query = 'collection:(GratefulDead) AND subject:(soundboard)';
-            const yearMatch = searchTerm.match(/\b\d{4}\b/);
-            const dateMatch = searchTerm.match(/(\d{1,2})[\/\- ](\d{1,2})[\/\- ](\d{4})/);
-            const year = yearMatch ? yearMatch[0] : null;
-            let cleanSearch = searchTerm.replace(/\b\d{4}\b/, '').trim();
+    // Start with the base soundboard query
+    let query = 'collection:(GratefulDead) AND subject:(soundboard)';
+    
+    // Parse for Year and Venue
+    const yearMatch = searchTerm.match(/\b\d{4}\b/);
+    const dateMatch = searchTerm.match(/(\d{1,2})[\/\- ](\d{1,2})[\/\- ](\d{4})/);
+    const year = yearMatch ? yearMatch[0] : null;
+    let cleanSearch = searchTerm.replace(/\b\d{4}\b/, '').trim();
 
-            if (dateMatch) {
-                const m = dateMatch[1].padStart(2, '0');
-                const d = dateMatch[2].padStart(2, '0');
-                const y = dateMatch[3];
-                query += ` AND date:${y}-${m}-${d}`;
-                cleanSearch = ''; 
-            } else if (year) {
-                query += ` AND date:[${year}-01-01 TO ${year}-12-31]`;
+    // 1. Date Specificity (e.g. 10/17/1984)
+    if (dateMatch) {
+        const m = dateMatch[1].padStart(2, '0');
+        const d = dateMatch[2].padStart(2, '0');
+        const y = dateMatch[3];
+        query += ` AND date:${y}-${m}-${d}`;
+        cleanSearch = ''; 
+    } 
+    // 2. Year Specificity (e.g. 1984)
+    else if (year) {
+        query += ` AND date:[${year}-01-01 TO ${year}-12-31]`;
+    }
+    
+    // 3. Venue/Keyword Specificity (e.g. Hampton)
+    if (cleanSearch) {
+        // We use a broad search across title and venue fields
+        // This handles "Red Rocks" or "Hampton" much more effectively
+        query += ` AND (title:(${cleanSearch}) OR venue:(${cleanSearch}))`;
+    }
+
+    const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=date+asc&rows=150&output=json`;
+
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (!data.response || !data.response.docs) throw new Error("Empty");
+
+        const uniqueShowsMap = {};
+        data.response.docs.forEach(item => {
+            if (!item.date) return;
+            const dateOnly = item.date.split('T')[0];
+            // Dedupe by picking the most popular version
+            if (!uniqueShowsMap[dateOnly] || item.downloads > uniqueShowsMap[dateOnly].downloads) {
+                uniqueShowsMap[dateOnly] = item;
             }
-            
-            if (cleanSearch) {
-                query += ` AND (title:"${cleanSearch}"~ OR venue:"${cleanSearch}"~)`;
-            }
+        });
 
-            const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=date+asc&rows=100&output=json`;
-
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                if (!data.response || !data.response.docs) throw new Error("Empty Vault");
-
-                const uniqueShowsMap = {};
-                data.response.docs.forEach(item => {
-                    if (!item.date) return;
-                    const dateOnly = item.date.split('T')[0];
-                    if (!uniqueShowsMap[dateOnly] || item.downloads > uniqueShowsMap[dateOnly].downloads) {
-                        uniqueShowsMap[dateOnly] = item;
-                    }
-                });
-
-                allShows = Object.values(uniqueShowsMap).sort((a, b) => new Date(a.date) - new Date(b.date));
-                loading.classList.add('hidden');
-                renderNextBatch();
-            } catch (err) {
-                loading.innerHTML = "<p class='text-red-500 font-bold uppercase text-xs'>Vault Timeout - Try Again</p>";
-            }
-        }
+        allShows = Object.values(uniqueShowsMap).sort((a, b) => new Date(a.date) - new Date(b.date));
+        loading.classList.add('hidden');
+        renderNextBatch();
+    } catch (err) {
+        loading.innerHTML = "<p class='text-red-500 font-bold uppercase text-xs'>Vault Timeout - Try Again</p>";
+    }
+}
 
         function renderNextBatch() {
             const container = document.getElementById('results');
