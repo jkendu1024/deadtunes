@@ -9,7 +9,7 @@
         .glass { background: rgba(31, 41, 55, 0.7); backdrop-filter: blur(10px); }
         .dead-gradient { background: linear-gradient(90deg, #ef4444, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         body { background-color: #000; background-image: radial-gradient(circle at center, #111 0%, #000 100%); }
-        .gold-glow { box-shadow: 0 0 20px rgba(234, 179, 8, 0.3); border: 1px solid rgba(234, 179, 8, 0.5); }
+        .gold-glow { box-shadow: 0 0 25px rgba(234, 179, 8, 0.2); border: 1px solid rgba(234, 179, 8, 0.4); }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #ef4444; border-radius: 10px; }
     </style>
@@ -29,7 +29,7 @@
             
             <div class="mt-2">
                 <h1 class="text-6xl font-black italic dead-gradient tracking-tighter leading-none text-red-600">DEADTUNES</h1>
-                <p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.3em] mt-3">High Fidelity Soundboard Vault</p>
+                <p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.3em] mt-3 font-semibold">High Fidelity Soundboard Vault</p>
                 
                 <div class="mt-6 flex flex-col items-center gap-1">
                     <p class="text-[9px] text-gray-600 uppercase tracking-[0.2em] font-bold italic">Unique Travelers</p>
@@ -40,23 +40,22 @@
             </div>
 
             <div class="flex gap-2 w-full max-w-md mt-4">
-                <input type="text" id="searchInput" placeholder="Search (e.g., Hampton 1988)" class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-3 w-full focus:outline-none focus:border-red-600 transition-all text-white placeholder-gray-600">
+                <input type="text" id="searchInput" placeholder="Search Year or Venue..." class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-3 w-full focus:outline-none focus:border-red-600 transition-all text-white placeholder-gray-600">
                 <button onclick="handleSearch()" class="bg-red-600 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-black transition-all duration-300 uppercase text-sm">Search</button>
             </div>
         </header>
 
-        <div id="on-this-day-container" class="mb-12 hidden">
-            <h2 class="text-center text-xs font-black uppercase tracking-[0.4em] text-yellow-500 mb-6">✨ On This Day in History ✨</h2>
-            <div id="on-this-day-result" class="max-w-md mx-auto"></div>
+        <div id="featured-container" class="mb-16">
+            <h2 id="featured-title" class="text-center text-xs font-black uppercase tracking-[0.4em] text-yellow-500 mb-6">Checking the Daily Vault...</h2>
+            <div id="featured-result" class="max-w-md mx-auto"></div>
         </div>
 
         <div id="loading" class="hidden flex flex-col items-center py-20">
             <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-red-500 mb-4 border-r-transparent"></div>
-            <p class="text-gray-600 text-xs uppercase tracking-[0.3em]">Opening the Vault...</p>
+            <p class="text-gray-600 text-xs uppercase tracking-[0.3em]">Searching history...</p>
         </div>
 
         <div id="results" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
-        
         <div id="loadMoreContainer" class="flex justify-center mt-12 mb-20 hidden">
             <button onclick="renderNextBatch()" class="border border-red-600 text-red-500 hover:bg-red-600 hover:text-white px-10 py-3 rounded-full font-bold transition-all uppercase tracking-widest text-xs shadow-lg">Load More Shows</button>
         </div>
@@ -67,33 +66,57 @@
         let displayedCount = 0;
         const BATCH_SIZE = 12;
 
-        // ON THIS DAY LOGIC
-        async function fetchOnThisDay() {
+        async function fetchFeatured() {
             const today = new Date();
             const month = String(today.getMonth() + 1).padStart(2, '0');
             const day = String(today.getDate()).padStart(2, '0');
             
+            // First try: Exact match for today across all years
             const query = `collection:(GratefulDead) AND date:*-${month}-${day} AND avg_rating:[4 TO 5] AND subject:(soundboard)`;
             const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=downloads+desc&rows=1&output=json`;
 
             try {
                 const response = await fetch(url);
                 const data = await response.json();
+                const container = document.getElementById('featured-result');
+                const title = document.getElementById('featured-title');
+
                 if (data.response.docs.length > 0) {
-                    const show = data.response.docs[0];
-                    document.getElementById('on-this-day-container').classList.remove('hidden');
-                    document.getElementById('on-this-day-result').innerHTML = `
-                        <div class="glass p-8 rounded-3xl gold-glow flex flex-col items-center text-center">
-                            <span class="text-yellow-500 font-mono text-sm font-bold mb-2 uppercase tracking-tighter">${show.date.split('T')[0]}</span>
-                            <h3 class="font-black text-xl leading-tight mb-4 text-white">${show.title}</h3>
-                            <p class="text-gray-400 text-xs uppercase tracking-widest mb-6">${show.venue || 'The Vault'}</p>
-                            <button onclick="playShow('${show.identifier}')" class="bg-yellow-600 hover:bg-yellow-500 text-black font-black py-3 px-8 rounded-2xl transition-all uppercase text-xs tracking-widest">
-                                Listen to the Choice
-                            </button>
-                        </div>
-                    `;
+                    title.innerText = "✨ On This Day in History ✨";
+                    renderFeaturedCard(data.response.docs[0]);
+                } else {
+                    // Fallback: If no show today, show the highest rated "All Time" choice
+                    title.innerText = "⭐ The Vault's Top Choice ⭐";
+                    fetchTopChoice();
                 }
-            } catch (e) { console.log("No show for today."); }
+            } catch (e) {
+                document.getElementById('featured-container').classList.add('hidden');
+            }
+        }
+
+        async function fetchTopChoice() {
+            const query = `collection:(GratefulDead) AND avg_rating:5 AND subject:(soundboard)`;
+            const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=downloads+desc&rows=50&output=json`;
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                // Randomly pick one of the top 50 most downloaded 5-star shows
+                const randomShow = data.response.docs[Math.floor(Math.random() * data.response.docs.length)];
+                renderFeaturedCard(randomShow);
+            } catch (e) {}
+        }
+
+        function renderFeaturedCard(show) {
+            document.getElementById('featured-result').innerHTML = `
+                <div class="glass p-8 rounded-3xl gold-glow flex flex-col items-center text-center">
+                    <span class="text-yellow-500 font-mono text-sm font-bold mb-2 uppercase tracking-tighter">${show.date ? show.date.split('T')[0] : 'Legendary'}</span>
+                    <h3 class="font-black text-xl leading-tight mb-4 text-white">${show.title}</h3>
+                    <p class="text-gray-400 text-xs uppercase tracking-widest mb-6">${show.venue || 'Unknown Venue'}</p>
+                    <button onclick="playShow('${show.identifier}')" class="bg-yellow-600 hover:bg-yellow-500 text-black font-black py-3 px-8 rounded-2xl transition-all uppercase text-xs tracking-widest">
+                        Listen Now
+                    </button>
+                </div>
+            `;
         }
 
         async function handleSearch() {
@@ -132,7 +155,7 @@
                 loading.classList.add('hidden');
                 renderNextBatch();
             } catch (err) {
-                loading.innerHTML = "<p class='text-red-500 font-bold uppercase text-xs font-mono'>Vault Timeout - Try Again</p>";
+                loading.innerHTML = "<p class='text-red-500 font-bold'>Vault connection error.</p>";
             }
         }
 
@@ -142,7 +165,7 @@
             const nextBatch = allShows.slice(displayedCount, displayedCount + BATCH_SIZE);
             
             if (nextBatch.length === 0 && displayedCount === 0) {
-                container.innerHTML = '<p class="col-span-full text-center text-gray-600 py-10 uppercase tracking-widest text-xs font-bold">No shows found.</p>';
+                container.innerHTML = '<p class="col-span-full text-center text-gray-600 py-10 uppercase tracking-widest text-xs font-bold font-mono">The Vault is quiet for this search.</p>';
                 return;
             }
 
@@ -154,7 +177,7 @@
                             <span class="text-yellow-500 font-black">★ ${show.avg_rating}</span>
                         </div>
                         <h3 class="font-bold text-md leading-tight mb-2 line-clamp-2">${show.title}</h3>
-                        <p class="text-gray-500 text-[10px] uppercase tracking-wider mb-6 opacity-60">${show.venue || 'The Vault'}</p>
+                        <p class="text-gray-500 text-[10px] uppercase tracking-wider mb-6 opacity-60">${show.venue || 'Various Venues'}</p>
                     </div>
                     <button onclick="playShow('${show.identifier}')" class="w-full bg-white/5 hover:bg-blue-600 text-white font-black py-2 rounded-xl transition-all uppercase text-[10px] tracking-widest border border-white/10 mt-auto">Stream Now</button>
                 </div>
@@ -178,8 +201,7 @@
             document.getElementById('player-iframe').innerHTML = '';
         }
 
-        // Initialize the Vault
-        fetchOnThisDay();
+        fetchFeatured();
         handleSearch();
     </script>
 </body>
