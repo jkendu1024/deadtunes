@@ -9,8 +9,8 @@
         .glass { background: rgba(31, 41, 55, 0.7); backdrop-filter: blur(10px); }
         .dead-gradient { background: linear-gradient(90deg, #ef4444, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         body { background-color: #000; background-image: radial-gradient(circle at center, #111 0%, #000 100%); }
+        .gold-glow { box-shadow: 0 0 20px rgba(234, 179, 8, 0.3); border: 1px solid rgba(234, 179, 8, 0.5); }
         ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #000; }
         ::-webkit-scrollbar-thumb { background: #ef4444; border-radius: 10px; }
     </style>
 </head>
@@ -45,9 +45,14 @@
             </div>
         </header>
 
+        <div id="on-this-day-container" class="mb-12 hidden">
+            <h2 class="text-center text-xs font-black uppercase tracking-[0.4em] text-yellow-500 mb-6">✨ On This Day in History ✨</h2>
+            <div id="on-this-day-result" class="max-w-md mx-auto"></div>
+        </div>
+
         <div id="loading" class="hidden flex flex-col items-center py-20">
             <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-red-500 mb-4 border-r-transparent"></div>
-            <p class="text-gray-600 text-xs uppercase tracking-[0.3em]">Sorting Chronologically...</p>
+            <p class="text-gray-600 text-xs uppercase tracking-[0.3em]">Opening the Vault...</p>
         </div>
 
         <div id="results" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
@@ -62,9 +67,37 @@
         let displayedCount = 0;
         const BATCH_SIZE = 12;
 
+        // ON THIS DAY LOGIC
+        async function fetchOnThisDay() {
+            const today = new Date();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            
+            const query = `collection:(GratefulDead) AND date:*-${month}-${day} AND avg_rating:[4 TO 5] AND subject:(soundboard)`;
+            const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=downloads+desc&rows=1&output=json`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.response.docs.length > 0) {
+                    const show = data.response.docs[0];
+                    document.getElementById('on-this-day-container').classList.remove('hidden');
+                    document.getElementById('on-this-day-result').innerHTML = `
+                        <div class="glass p-8 rounded-3xl gold-glow flex flex-col items-center text-center">
+                            <span class="text-yellow-500 font-mono text-sm font-bold mb-2 uppercase tracking-tighter">${show.date.split('T')[0]}</span>
+                            <h3 class="font-black text-xl leading-tight mb-4 text-white">${show.title}</h3>
+                            <p class="text-gray-400 text-xs uppercase tracking-widest mb-6">${show.venue || 'The Vault'}</p>
+                            <button onclick="playShow('${show.identifier}')" class="bg-yellow-600 hover:bg-yellow-500 text-black font-black py-3 px-8 rounded-2xl transition-all uppercase text-xs tracking-widest">
+                                Listen to the Choice
+                            </button>
+                        </div>
+                    `;
+                }
+            } catch (e) { console.log("No show for today."); }
+        }
+
         async function handleSearch() {
-            const searchInput = document.getElementById('searchInput');
-            const searchTerm = searchInput.value.trim();
+            const searchTerm = document.getElementById('searchInput').value.trim();
             const container = document.getElementById('results');
             const loading = document.getElementById('loading');
             const loadMoreBtn = document.getElementById('loadMoreContainer');
@@ -75,9 +108,7 @@
             allShows = [];
             displayedCount = 0;
 
-            // Logic: If search is exactly 4 digits, search the DATE field specifically
             let query = 'collection:(GratefulDead) AND avg_rating:[4 TO 5] AND subject:(soundboard)';
-            
             if (/^\d{4}$/.test(searchTerm)) {
                 query += ` AND date:[${searchTerm}-01-01 TO ${searchTerm}-12-31]`;
             } else if (searchTerm) {
@@ -89,59 +120,49 @@
             try {
                 const response = await fetch(url);
                 const data = await response.json();
-                
                 const uniqueShowsMap = {};
                 data.response.docs.forEach(item => {
                     if (!item.date) return;
                     const dateOnly = item.date.split('T')[0];
-                    
-                    // Deduplication: Pick the version with most downloads
                     if (!uniqueShowsMap[dateOnly] || item.downloads > uniqueShowsMap[dateOnly].downloads) {
                         uniqueShowsMap[dateOnly] = item;
                     }
                 });
-
-                // Strict Chronological Sort (Jan -> Dec)
                 allShows = Object.values(uniqueShowsMap).sort((a, b) => new Date(a.date) - new Date(b.date));
-                
                 loading.classList.add('hidden');
                 renderNextBatch();
             } catch (err) {
-                loading.innerHTML = "<p class='text-red-500 font-bold uppercase text-xs'>Vault Timeout - Try Again</p>";
+                loading.innerHTML = "<p class='text-red-500 font-bold uppercase text-xs font-mono'>Vault Timeout - Try Again</p>";
             }
         }
 
         function renderNextBatch() {
             const container = document.getElementById('results');
             const loadMoreBtn = document.getElementById('loadMoreContainer');
-            
             const nextBatch = allShows.slice(displayedCount, displayedCount + BATCH_SIZE);
             
             if (nextBatch.length === 0 && displayedCount === 0) {
-                container.innerHTML = '<p class="col-span-full text-center text-gray-600 py-10 uppercase tracking-widest text-xs font-bold">The Vault is empty for this search.</p>';
+                container.innerHTML = '<p class="col-span-full text-center text-gray-600 py-10 uppercase tracking-widest text-xs font-bold">No shows found.</p>';
                 return;
             }
 
             container.innerHTML += nextBatch.map(show => `
-                <div class="glass p-7 rounded-3xl border border-gray-800 hover:border-red-600/40 transition-all duration-500 flex flex-col justify-between shadow-2xl h-full">
+                <div class="glass p-7 rounded-3xl border border-gray-800 hover:border-red-600/40 transition-all duration-500 flex flex-col justify-between shadow-2xl h-full text-left">
                     <div>
                         <div class="flex justify-between items-center mb-4 text-[10px] font-mono">
-                            <span class="text-red-500 font-bold">${show.date ? show.date.split('T')[0] : 'UNKNOWN DATE'}</span>
+                            <span class="text-red-500 font-bold">${show.date ? show.date.split('T')[0] : 'N/A'}</span>
                             <span class="text-yellow-500 font-black">★ ${show.avg_rating}</span>
                         </div>
-                        <h3 class="font-bold text-md leading-tight mb-2 line-clamp-2 text-left">${show.title}</h3>
-                        <p class="text-gray-500 text-[10px] uppercase tracking-wider mb-6 text-left opacity-60">${show.venue || 'The Great Beyond'}</p>
+                        <h3 class="font-bold text-md leading-tight mb-2 line-clamp-2">${show.title}</h3>
+                        <p class="text-gray-500 text-[10px] uppercase tracking-wider mb-6 opacity-60">${show.venue || 'The Vault'}</p>
                     </div>
                     <button onclick="playShow('${show.identifier}')" class="w-full bg-white/5 hover:bg-blue-600 text-white font-black py-2 rounded-xl transition-all uppercase text-[10px] tracking-widest border border-white/10 mt-auto">Stream Now</button>
                 </div>
             `).join('');
 
             displayedCount += BATCH_SIZE;
-            if (displayedCount < allShows.length) {
-                loadMoreBtn.classList.remove('hidden');
-            } else {
-                loadMoreBtn.classList.add('hidden');
-            }
+            if (displayedCount < allShows.length) loadMoreBtn.classList.remove('hidden');
+            else loadMoreBtn.classList.add('hidden');
         }
 
         function playShow(id) {
@@ -157,7 +178,8 @@
             document.getElementById('player-iframe').innerHTML = '';
         }
 
-        // Initial Load
+        // Initialize the Vault
+        fetchOnThisDay();
         handleSearch();
     </script>
 </body>
