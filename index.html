@@ -120,49 +120,60 @@
             `;
         }
 
-        async function handleSearch() {
-            const searchTerm = document.getElementById('searchInput').value.trim();
-            const container = document.getElementById('results');
-            const loading = document.getElementById('loading');
-            const loadMoreBtn = document.getElementById('loadMoreContainer');
-            
-            if (!searchTerm) return; // Prevent empty searches on boot
+async function handleSearch() {
+    const searchTerm = document.getElementById('searchInput').value.trim();
+    const container = document.getElementById('results');
+    const loading = document.getElementById('loading');
+    const loadMoreBtn = document.getElementById('loadMoreContainer');
+    
+    if (!searchTerm) return;
 
-            loading.classList.remove('hidden');
-            loadMoreBtn.classList.add('hidden');
-            container.innerHTML = '';
-            allShows = [];
-            displayedCount = 0;
+    loading.classList.remove('hidden');
+    loadMoreBtn.classList.add('hidden');
+    container.innerHTML = '';
+    allShows = [];
+    displayedCount = 0;
 
-            let query = 'collection:(GratefulDead) AND avg_rating:[4 TO 5] AND subject:(soundboard)';
-            const yearMatch = searchTerm.match(/\b\d{4}\b/);
-            const year = yearMatch ? yearMatch[0] : null;
-            const cleanSearch = searchTerm.replace(/\b\d{4}\b/, '').trim();
+    // Base query for high-quality SBDs
+    let query = 'collection:(GratefulDead) AND avg_rating:[4 TO 5] AND subject:(soundboard)';
+    
+    // Extract year and keywords
+    const yearMatch = searchTerm.match(/\b\d{4}\b/);
+    const year = yearMatch ? yearMatch[0] : null;
+    const cleanSearch = searchTerm.replace(/\b\d{4}\b/, '').trim();
 
-            if (year) query += ` AND date:[${year}-01-01 TO ${year}-12-31]`;
-            if (cleanSearch) query += ` AND ("${cleanSearch}")`;
+    if (year) {
+        query += ` AND date:[${year}-01-01 TO ${year}-12-31]`;
+    }
+    
+    if (cleanSearch) {
+        // We use a "fuzzy" search here so 'Hampton' matches 'Hampton Coliseum' 
+        // and also checks the description/title fields.
+        query += ` AND (title:"${cleanSearch}"~ OR description:"${cleanSearch}"~ OR venue:"${cleanSearch}"~)`;
+    }
 
-            try {
-                const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=date+asc&rows=200&output=json`;
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                const uniqueShowsMap = {};
-                data.response.docs.forEach(item => {
-                    if (!item.date) return;
-                    const dateOnly = item.date.split('T')[0];
-                    if (!uniqueShowsMap[dateOnly] || item.downloads > uniqueShowsMap[dateOnly].downloads) {
-                        uniqueShowsMap[dateOnly] = item;
-                    }
-                });
+    const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=date+asc&rows=150&output=json`;
 
-                allShows = Object.values(uniqueShowsMap).sort((a, b) => new Date(a.date) - new Date(b.date));
-                loading.classList.add('hidden');
-                renderNextBatch();
-            } catch (err) {
-                loading.innerHTML = "<p class='text-red-500 font-bold uppercase text-xs'>Vault Busy. Try Again.</p>";
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        const uniqueShowsMap = {};
+        data.response.docs.forEach(item => {
+            if (!item.date) return;
+            const dateOnly = item.date.split('T')[0];
+            if (!uniqueShowsMap[dateOnly] || item.downloads > uniqueShowsMap[dateOnly].downloads) {
+                uniqueShowsMap[dateOnly] = item;
             }
-        }
+        });
+
+        allShows = Object.values(uniqueShowsMap).sort((a, b) => new Date(a.date) - new Date(b.date));
+        loading.classList.add('hidden');
+        renderNextBatch();
+    } catch (err) {
+        loading.innerHTML = "<p class='text-red-500 font-bold uppercase text-xs'>Vault Timeout - Try Again</p>";
+    }
+}
 
         function renderNextBatch() {
             const container = document.getElementById('results');
