@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DeadTunes | 5-Star SBDs</title>
+    <title>PLAY DEAD | High Fidelity Vault</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .glass { background: rgba(31, 41, 55, 0.7); backdrop-filter: blur(10px); }
@@ -28,13 +28,13 @@
             <img src="https://peaceproject.com/wp-content/uploads/LS455.jpg" alt="Stealie" class="w-32 h-32 md:w-44 md:h-44 drop-shadow-[0_0_25px_rgba(239,68,68,0.4)] rounded-full border-4 border-gray-900">
             
             <div class="mt-2">
-                <h1 class="text-6xl font-black italic dead-gradient tracking-tighter leading-none text-red-600 uppercase">DEADTUNES</h1>
+                <h1 class="text-7xl font-black italic dead-gradient tracking-tighter leading-none uppercase">PLAY DEAD</h1>
                 <p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.3em] mt-3">High Fidelity Soundboard Vault</p>
                 
                 <div class="mt-6 flex flex-col items-center gap-1">
                     <p class="text-[9px] text-gray-600 uppercase tracking-[0.2em] font-bold italic">Unique Travelers</p>
                     <div class="bg-gray-900/80 px-4 py-2 rounded-xl border border-gray-800 flex justify-center shadow-inner">
-                        <img src="https://count.getloli.com/get/@jk_deadtunes_vault_vFinal?theme=asoul&type=uv" alt="Unique Visitors" class="h-10 opacity-90 brightness-110">
+                        <img src="https://count.getloli.com/get/@jk_playdead_vault?theme=asoul&type=uv" alt="Unique Visitors" class="h-10 opacity-90 brightness-110">
                     </div>
                 </div>
             </div>
@@ -44,6 +44,24 @@
                 <button onclick="handleSearch()" class="bg-red-600 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-black transition-all duration-300 uppercase text-sm">Search</button>
             </div>
         </header>
+
+        <section class="mb-16">
+            <h2 class="text-center text-xs font-black uppercase tracking-[0.4em] text-red-500 mb-8 italic">JK Recommendations</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button onclick="quickSearch('Veneta 1972')" class="glass p-4 rounded-2xl border border-gray-800 hover:border-blue-500 transition-all text-left group">
+                    <p class="text-[9px] text-blue-400 font-bold uppercase mb-1">Pinnacle '72</p>
+                    <p class="font-bold text-sm text-gray-200 group-hover:text-white">Veneta, OR 8/27/72</p>
+                </button>
+                <button onclick="quickSearch('Cornell 1977')" class="glass p-4 rounded-2xl border border-gray-800 hover:border-blue-500 transition-all text-left group">
+                    <p class="text-[9px] text-blue-400 font-bold uppercase mb-1">The Holy Grail</p>
+                    <p class="font-bold text-sm text-gray-200 group-hover:text-white">Barton Hall 5/8/77</p>
+                </button>
+                <button onclick="quickSearch('Fillmore East 1970')" class="glass p-4 rounded-2xl border border-gray-800 hover:border-blue-500 transition-all text-left group">
+                    <p class="text-[9px] text-blue-400 font-bold uppercase mb-1">Acoustic/Electric Peak</p>
+                    <p class="font-bold text-sm text-gray-200 group-hover:text-white">Fillmore East 5/15/70</p>
+                </button>
+            </div>
+        </section>
 
         <div id="featured-container" class="mb-16">
             <h2 id="featured-title" class="text-center text-xs font-black uppercase tracking-[0.4em] text-yellow-500 mb-6 italic">Opening the Vault...</h2>
@@ -65,6 +83,12 @@
         let allShows = [];
         let displayedCount = 0;
         const BATCH_SIZE = 12;
+
+        // Allows JK Recommendations to trigger a search
+        function quickSearch(term) {
+            document.getElementById('searchInput').value = term;
+            handleSearch();
+        }
 
         async function fetchFeatured() {
             try {
@@ -148,6 +172,7 @@
                 allShows = Object.values(uniqueShowsMap).sort((a, b) => new Date(a.date) - new Date(b.date));
                 loading.classList.add('hidden');
                 renderNextBatch();
+                window.scrollTo({ top: loading.offsetTop - 100, behavior: 'smooth' });
             } catch (err) { loading.innerHTML = "<p class='text-red-500 font-bold uppercase text-xs'>Vault Timeout - Try Again</p>"; }
         }
 
