@@ -8,24 +8,45 @@
     <style>
         .glass { background: rgba(31, 41, 55, 0.7); backdrop-filter: blur(10px); }
         .dead-gradient { background: linear-gradient(90deg, #ef4444, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        body { background-color: #000; background-image: radial-gradient(circle at center, #111 0%, #000 100%); }
-        .gold-glow { box-shadow: 0 0 30px rgba(234, 179, 8, 0.25); border: 1px solid rgba(234, 179, 8, 0.5); }
         
-        @keyframes float {
-            0% { transform: translateY(0px); opacity: 0; }
-            50% { opacity: 1; }
-            100% { transform: translateY(-60px); opacity: 0; }
+        /* Deep radial background */
+        body { background-color: #000; background-image: radial-gradient(circle at center, #111 0%, #000 100%); position: relative; min-h-screen: 100vh; overflow-x: hidden; }
+        
+        /* Slick Search Glow */
+        .search-focus:focus-within { box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); border-color: #ef4444; }
+
+        /* Animation Keyframes (used by both global and header notes) */
+        @keyframes floatNotes {
+            0% { transform: translateY(0px) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(-150px) rotate(20deg); opacity: 0; }
         }
-        .note { position: absolute; font-size: 24px; color: #fff; opacity: 0; animation: float 3s infinite ease-in-out; pointer-events: none; top: -20px; }
-        .n1 { left: 10%; animation-delay: 0s; }
-        .n2 { left: 50%; animation-delay: 1.5s; }
-        .n3 { left: 90%; animation-delay: 0.8s; }
+
+        /* --- Global Background Notes (All over the page) --- */
+        #global-note-field { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
+        .global-note { position: absolute; font-size: 20px; color: rgba(255, 255, 255, 0.15); /* very faint */ animation: floatNotes infinite linear; }
+
+        /* --- Header Notes (Floating around the Title) --- */
+        .header-notes-field { position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 0; top: 0; left: 0; }
+        .header-note { position: absolute; font-size: 28px; color: #fff; opacity: 0; animation: floatNotes 4s infinite ease-in-out; }
+        
+        /* Positioning logic for header notes to float AROUND the title */
+        .hn1 { left: -10%; top: 20%; animation-delay: 0s; }
+        .hn2 { right: -10%; top: 40%; animation-delay: 1.5s; font-size: 32px; }
+        .hn3 { left: 50%; bottom: -10%; transform: translateX(-50%); animation-delay: 2.8s; font-size: 24px; }
 
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #ef4444; border-radius: 10px; }
+        
+        /* Ensure content stays above the global note field */
+        header, section, div { position: relative; z-index: 10; }
     </style>
 </head>
 <body class="text-gray-100 min-h-screen font-sans">
+
+    <div id="global-note-field">
+        </div>
 
     <div id="player-container" class="sticky top-0 z-50 w-full bg-gray-900 border-b border-red-900 hidden shadow-2xl">
         <div class="max-w-6xl mx-auto p-2 flex flex-col">
@@ -35,43 +56,46 @@
     </div>
 
     <div class="max-w-6xl mx-auto px-4 py-8">
-        <header class="flex flex-col items-center mb-12 gap-4 text-center">
+        <header class="flex flex-col items-center mb-16 gap-6 text-center">
             <img src="https://peaceproject.com/wp-content/uploads/LS455.jpg" alt="Stealie" class="w-32 h-32 md:w-44 md:h-44 drop-shadow-[0_0_25px_rgba(239,68,68,0.4)] rounded-full border-4 border-gray-900">
             
-            <div class="mt-4 relative w-full max-w-2xl">
-                <span class="note n1">♪</span>
-                <span class="note n2">♫</span>
-                <span class="note n3">♩</span>
-                <h1 class="text-6xl md:text-9xl font-black italic dead-gradient tracking-tighter leading-none uppercase">PLAY DEAD</h1>
-                <p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.3em] mt-4">High Fidelity Soundboard Vault powered by Jeremy</p>
+            <div class="relative w-full max-w-2xl px-12">
+                <div class="header-notes-field">
+                    <span class="header-note hn1">♪</span>
+                    <span class="header-note hn2">♫</span>
+                    <span class="header-note hn3">♩</span>
+                </div>
+
+                <h1 class="text-7xl md:text-9xl font-black italic dead-gradient tracking-tighter leading-none uppercase z-10">PLAY DEAD</h1>
+                <p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.4em] mt-4 z-10">High Fidelity Soundboard Vault powered by Jeremy</p>
                 
-                <div class="mt-6 flex flex-col items-center gap-1">
+                <div class="mt-8 flex flex-col items-center gap-1 z-10">
                     <p class="text-[9px] text-gray-600 uppercase tracking-[0.2em] font-bold italic">Unique Travelers</p>
-                    <div class="bg-gray-900/80 px-4 py-2 rounded-xl border border-gray-800 flex justify-center shadow-inner">
-                        <img src="https://count.getloli.com/get/@jk_playdead_vault_clean?theme=asoul&type=uv" alt="Counter" class="h-10 opacity-90 brightness-110">
+                    <div class="bg-gray-900/80 px-6 py-3 rounded-2xl border border-gray-800 flex justify-center shadow-inner">
+                        <img src="https://count.getloli.com/get/@jk_playdead_v_notes?theme=asoul&type=uv" alt="Counter" class="h-10 opacity-90 brightness-110">
                     </div>
                 </div>
             </div>
 
-            <div class="flex gap-2 w-full max-w-md mt-10">
-                <input type="text" id="searchInput" placeholder="Search Year, Venue, or Date..." class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-3 w-full focus:outline-none focus:border-red-600 transition-all text-white">
-                <button onclick="handleSearch()" class="bg-red-600 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-black transition-all duration-300 uppercase text-sm">Search</button>
+            <div class="flex flex-col md:flex-row gap-3 w-full max-w-lg mt-4 search-focus transition-all duration-300 p-1 bg-gray-900 border border-gray-800 rounded-2xl z-20">
+                <input type="text" id="searchInput" placeholder="Search Year, Venue, or Date..." class="bg-transparent px-5 py-4 w-full focus:outline-none text-white placeholder-gray-600 font-medium">
+                <button onclick="handleSearch()" class="bg-red-600 hover:bg-blue-600 text-white px-8 py-4 rounded-xl font-black transition-all duration-300 uppercase text-sm tracking-widest shadow-lg">Search</button>
             </div>
         </header>
 
-        <div id="featured-container" class="mb-16">
-            <h2 id="featured-title" class="text-center text-xs font-black uppercase tracking-[0.4em] text-yellow-500 mb-6 italic">Vault of the Day</h2>
+        <div id="featured-container" class="mb-20">
+            <h2 class="text-center text-xs font-black uppercase tracking-[0.6em] text-yellow-500 mb-8 italic">Vault of the Day</h2>
             <div id="featured-result" class="max-w-md mx-auto"></div>
         </div>
 
         <div id="loading" class="hidden flex flex-col items-center py-20">
-            <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-red-500 mb-4 border-r-transparent"></div>
+            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-red-500 border-r-transparent"></div>
         </div>
 
         <div id="results" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         
-        <div id="loadMoreContainer" class="flex justify-center mt-12 mb-20 hidden">
-            <button onclick="renderNextBatch()" class="border border-red-600 text-red-500 hover:bg-red-600 hover:text-white px-10 py-3 rounded-full font-bold transition-all uppercase tracking-widest text-xs shadow-lg">Load More</button>
+        <div id="loadMoreContainer" class="flex justify-center mt-16 mb-20 hidden">
+            <button onclick="renderNextBatch()" class="border-2 border-red-600 text-red-500 hover:bg-red-600 hover:text-white px-12 py-4 rounded-full font-black transition-all uppercase tracking-widest text-xs shadow-xl">Load More Shows</button>
         </div>
     </div>
 
@@ -79,6 +103,31 @@
         let allShows = [];
         let displayedCount = 0;
         const BATCH_SIZE = 12;
+
+        // --- Create faint, random notes all over the page background ---
+        function populateGlobalNotes() {
+            const field = document.getElementById('global-note-field');
+            const noteTypes = ['♪', '♫', '♩', '♬', '♭', '♮'];
+            const noteCount = 20; // Adjusted for "all over, but not too much"
+
+            for (let i = 0; i < noteCount; i++) {
+                const note = document.createElement('span');
+                note.classList.add('global-note');
+                note.innerText = noteTypes[Math.floor(Math.random() * noteTypes.length)];
+                
+                // Randomly distribute across the page
+                note.style.left = Math.random() * 100 + '%';
+                note.style.top = Math.random() * 120 + '%'; // Spread vertically, some start below the fold
+                
+                // Randomly vary the animation time and delay for natural look
+                const duration = 15 + Math.random() * 10; // 15s to 25s for slow, faint float
+                const delay = Math.random() * 20; // 0s to 20s delay
+                note.style.animationDuration = duration + 's';
+                note.style.animationDelay = delay + 's';
+                
+                field.appendChild(note);
+            }
+        }
 
         async function fetchFeatured() {
             try {
@@ -94,20 +143,33 @@
                 if (data.response && data.response.docs.length > 0) {
                     renderFeaturedCard(data.response.docs[0]);
                 } else {
-                    document.getElementById('featured-container').style.display = 'none';
+                    fetchTopChoice();
                 }
             } catch (e) {
-                document.getElementById('featured-container').style.display = 'none';
+                fetchTopChoice();
             }
+        }
+
+        async function fetchTopChoice() {
+            const query = `collection:(GratefulDead) AND avg_rating:5 AND downloads:[30000 TO 1000000]`;
+            const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=downloads+desc&rows=20&output=json`;
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                if (data.response.docs.length > 0) {
+                    const randomShow = data.response.docs[Math.floor(Math.random() * data.response.docs.length)];
+                    renderFeaturedCard(randomShow);
+                }
+            } catch (e) {}
         }
 
         function renderFeaturedCard(show) {
             document.getElementById('featured-result').innerHTML = `
-                <div class="glass p-8 rounded-3xl gold-glow flex flex-col items-center text-center">
-                    <span class="text-yellow-500 font-mono text-sm font-bold mb-2 uppercase tracking-tighter">${show.date ? show.date.split('T')[0] : 'Legendary'}</span>
-                    <h3 class="font-black text-xl leading-tight mb-4 text-white">${show.title}</h3>
-                    <p class="text-gray-400 text-[10px] uppercase tracking-widest mb-6">${show.venue || 'The Great Beyond'}</p>
-                    <button onclick="playShow('${show.identifier}')" class="bg-yellow-600 hover:bg-yellow-500 text-black font-black py-3 px-8 rounded-2xl transition-all uppercase text-xs tracking-widest">Listen Now</button>
+                <div class="glass p-10 rounded-3xl gold-glow flex flex-col items-center text-center transition-all hover:scale-[1.02] z-10">
+                    <span class="text-yellow-500 font-mono text-sm font-bold mb-3 uppercase tracking-tighter">${show.date ? show.date.split('T')[0] : 'Legendary'}</span>
+                    <h3 class="font-black text-2xl leading-tight mb-6 text-white">${show.title}</h3>
+                    <p class="text-gray-400 text-[10px] uppercase tracking-widest mb-8 font-bold">${show.venue || 'The Great Beyond'}</p>
+                    <button onclick="playShow('${show.identifier}')" class="bg-yellow-600 hover:bg-yellow-500 text-black font-black py-4 px-10 rounded-2xl transition-all uppercase text-xs tracking-widest shadow-2xl">Stream This Show</button>
                 </div>`;
         }
 
@@ -143,7 +205,7 @@
             }
 
             try {
-                const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=date+asc&rows=100&output=json`;
+                const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=date+asc&rows=150&output=json`;
                 const response = await fetch(url);
                 const data = await response.json();
                 
@@ -161,7 +223,7 @@
                 renderNextBatch();
                 window.scrollTo({ top: container.offsetTop - 100, behavior: 'smooth' });
             } catch (err) { 
-                loading.innerHTML = "<p class='text-red-500 uppercase font-bold text-xs'>Vault Timeout - Try Again</p>"; 
+                loading.innerHTML = "<p class='text-red-500 font-bold'>Vault connection error.</p>"; 
             }
         }
 
@@ -171,7 +233,7 @@
             const nextBatch = allShows.slice(displayedCount, displayedCount + BATCH_SIZE);
             
             if (nextBatch.length === 0 && displayedCount === 0) {
-                container.innerHTML = '<p class="col-span-full text-center text-gray-600 py-10 uppercase tracking-widest text-xs font-bold">No High Fidelity Tapes Found.</p>';
+                container.innerHTML = '<p class="col-span-full text-center text-gray-600 py-10 uppercase tracking-widest text-xs font-bold">No recordings found for this criteria.</p>';
                 return;
             }
 
@@ -179,17 +241,17 @@
                 const rating = parseFloat(show.avg_rating) || 0;
                 const isRare = rating < 4.0 && rating > 0;
                 return `
-                    <div class="glass p-7 rounded-3xl border border-gray-800 hover:border-red-600/40 transition-all duration-500 flex flex-col justify-between shadow-2xl h-full text-left relative overflow-hidden">
-                        ${isRare ? '<div class="absolute top-0 right-0 bg-red-900/80 text-[8px] px-3 py-1 uppercase font-black tracking-widest text-white rounded-bl-xl border-l border-b border-red-500">Rare Copy</div>' : ''}
+                    <div class="glass p-8 rounded-3xl border border-gray-800 hover:border-red-600/50 transition-all duration-500 flex flex-col justify-between shadow-2xl h-full text-left relative overflow-hidden z-10">
+                        ${isRare ? '<div class="absolute top-0 right-0 bg-red-900/80 text-[8px] px-3 py-1 uppercase font-black tracking-widest text-white rounded-bl-xl">Rare / NR</div>' : ''}
                         <div>
-                            <div class="flex justify-between items-center mb-4 text-[10px] font-mono">
+                            <div class="flex justify-between items-center mb-5 text-[10px] font-mono">
                                 <span class="text-red-500 font-bold">${show.date ? show.date.split('T')[0] : 'N/A'}</span>
                                 <span class="${isRare ? 'text-red-400' : 'text-yellow-500'} font-black">★ ${show.avg_rating || 'NR'}</span>
                             </div>
-                            <h3 class="font-bold text-md leading-tight mb-2 line-clamp-2">${show.title}</h3>
-                            <p class="text-gray-500 text-[10px] uppercase tracking-wider mb-6 opacity-60">${show.venue || 'Various Venues'}</p>
+                            <h3 class="font-bold text-lg leading-tight mb-3 line-clamp-2 text-gray-100">${show.title}</h3>
+                            <p class="text-gray-500 text-[10px] uppercase tracking-wider mb-8 font-medium">${show.venue || 'Various Venues'}</p>
                         </div>
-                        <button onclick="playShow('${show.identifier}')" class="w-full bg-white/5 hover:bg-blue-600 text-white font-black py-2 rounded-xl transition-all uppercase text-[10px] tracking-widest border border-white/10 mt-auto">Stream Now</button>
+                        <button onclick="playShow('${show.identifier}')" class="w-full bg-white/5 hover:bg-blue-600 text-white font-black py-3 rounded-xl transition-all uppercase text-[10px] tracking-widest border border-white/10 mt-auto">Listen Now</button>
                     </div>`;
             }).join('');
 
@@ -210,7 +272,11 @@
             document.getElementById('player-iframe').innerHTML = '';
         }
 
-        window.onload = fetchFeatured;
+        // --- Run on Load ---
+        window.onload = function() {
+            populateGlobalNotes(); // Fill the background
+            fetchFeatured();      // Load Vault of the Day
+        }
     </script>
 </body>
 </html>
