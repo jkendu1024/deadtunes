@@ -1,128 +1,146 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PLAY DEAD | High Fidelity Vault</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .glass { background: rgba(31, 41, 55, 0.7); backdrop-filter: blur(10px); }
-        .dead-gradient { background: linear-gradient(90deg, #ef4444, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        body { background-color: #000; background-image: radial-gradient(circle at center, #111 0%, #000 100%); position: relative; min-height: 100vh; overflow-x: hidden; }
-        .search-focus:focus-within { box-shadow: 0 0 20px rgba(239, 68, 68, 0.2); border-color: #ef4444; }
-        @keyframes drift {
-            0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
-            10% { opacity: 0.25; }
-            90% { opacity: 0.25; }
-            100% { transform: translateY(-20vh) rotate(360deg); opacity: 0; }
-        }
-        #note-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
-        .ambient-note { position: absolute; color: #fff; filter: blur(1px); animation: drift infinite linear; font-family: serif; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #ef4444; border-radius: 10px; }
-        header, section, div { position: relative; z-index: 10; }
-    </style>
-</head>
-<body class="text-gray-100 min-h-screen font-sans">
-    <div id="note-canvas"></div>
-    <div id="player-container" class="sticky top-0 z-50 w-full bg-gray-900 border-b border-red-900 hidden shadow-2xl">
-        <div class="max-w-6xl mx-auto p-2 flex flex-col">
-            <button onclick="closePlayer()" class="self-end text-[10px] text-gray-500 hover:text-white mb-1 uppercase tracking-widest font-bold px-2">✕ Close Player</button>
-            <div id="player-iframe"></div>
-        </div>
-    </div>
-    <div class="max-w-6xl mx-auto px-4 py-8">
-        <header class="flex flex-col items-center mb-16 gap-6 text-center">
-            <img src="https://peaceproject.com/wp-content/uploads/LS455.jpg" alt="Stealie" class="w-32 h-32 md:w-44 md:h-44 drop-shadow-[0_0_25px_rgba(239,68,68,0.4)] rounded-full border-4 border-gray-900">
-            <div class="relative w-full max-w-2xl">
-                <h1 class="text-7xl md:text-9xl font-black italic dead-gradient tracking-tighter leading-none uppercase">PLAY DEAD</h1>
-                <p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.4em] mt-4">High Fidelity Soundboard Vault powered by Jeremy</p>
-                <div class="mt-8 flex flex-col items-center gap-1">
-                    <p class="text-[9px] text-gray-600 uppercase tracking-[0.2em] font-bold italic">Unique Travelers</p>
-                    <div class="bg-gray-900/80 px-6 py-3 rounded-2xl border border-gray-800 flex justify-center shadow-inner">
-                        <img src="https://count.getloli.com/get/@jk_playdead_vault_fixed_final?theme=asoul&type=uv" alt="Counter" class="h-10 opacity-90 brightness-110">
-                    </div>
-                </div>
-            </div>
-            <div class="flex flex-col md:flex-row gap-3 w-full max-w-lg mt-4 search-focus transition-all duration-300 p-1 bg-gray-900 border border-gray-800 rounded-2xl">
-                <input type="text" id="searchInput" onkeypress="if(event.key==='Enter')handleSearch()" placeholder="Search Year, Venue, or Date..." class="bg-transparent px-5 py-4 w-full focus:outline-none text-white placeholder-gray-600 font-medium">
-                <button onclick="handleSearch()" class="bg-red-600 hover:bg-blue-600 text-white px-8 py-4 rounded-xl font-black transition-all duration-300 uppercase text-sm tracking-widest shadow-lg">Search</button>
-            </div>
-        </header>
-        <div id="featured-container" class="mb-20">
-            <h2 id="featured-label" class="text-center text-xs font-black uppercase tracking-[0.6em] text-yellow-500 mb-8 italic">Vault of the Day</h2>
-            <div id="featured-result" class="max-w-md mx-auto"></div>
-        </div>
-        <div id="loading" class="hidden flex flex-col items-center py-20">
-            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-red-500 border-r-transparent"></div>
-        </div>
-        <div id="results" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
-        <div id="loadMoreContainer" class="flex justify-center mt-16 mb-20 hidden">
-            <button onclick="renderNextBatch()" class="border-2 border-red-600 text-red-500 hover:bg-red-600 hover:text-white px-12 py-4 rounded-full font-black transition-all uppercase tracking-widest text-xs shadow-xl">Load More Shows</button>
-        </div>
-    </div>
-    <script>
-        let allShows = [];
-        let displayedCount = 0;
-        const BATCH_SIZE = 12;
+<div class="mt-6 flex flex-col items-center gap-1">
+<p class="text-[9px] text-gray-600 uppercase tracking-[0.2em] font-bold italic">Unique Travelers</p>
+<div class="bg-gray-900/80 px-4 py-2 rounded-xl border border-gray-800 flex justify-center shadow-inner">
+                        <img src="https://count.getloli.com/get/@jk_deadtunes_vault_v3?theme=asoul&type=uv" alt="Unique Visitors" class="h-10 opacity-90 brightness-110">
+                        <img src="https://count.getloli.com/get/@jk_deadtunes_vault_vFinal?theme=asoul&type=uv" alt="Unique Visitors" class="h-10 opacity-90 brightness-110">
+</div>
+</div>
+</div>
 
-        function spawnNotes() {
-            const canvas = document.getElementById('note-canvas');
-            const icons = ['♪', '♫', '♩', '♬'];
-            for (let i = 0; i < 15; i++) {
-                const note = document.createElement('div');
-                note.className = 'ambient-note';
-                note.innerText = icons[Math.floor(Math.random() * icons.length)];
-                const size = Math.random() * (28 - 14) + 14;
-                const left = Math.random() * 100;
-                const duration = Math.random() * (25 - 12) + 12;
-                const delay = Math.random() * 20;
-                note.style.fontSize = `${size}px`;
-                note.style.left = `${left}%`;
-                note.style.animationDuration = `${duration}s`;
-                note.style.animationDelay = `-${delay}s`;
-                canvas.appendChild(note);
-            }
-        }
+<div class="flex gap-2 w-full max-w-md mt-4">
+                <input type="text" id="searchInput" placeholder="Search (e.g., 10/17/1984 or Hampton)" class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-3 w-full focus:outline-none focus:border-red-600 transition-all text-white placeholder-gray-600">
+                <input type="text" id="searchInput" placeholder="Search (e.g., 10/17/1984 or Hampton)" class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-3 w-full focus:outline-none focus:border-red-600 transition-all text-white">
+<button onclick="handleSearch()" class="bg-red-600 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-black transition-all duration-300 uppercase text-sm">Search</button>
+</div>
+</header>
+@@ -52,11 +52,10 @@ <h2 id="featured-title" class="text-center text-xs font-black uppercase tracking
 
-        async function fetchFeatured() {
-            try {
-                const today = new Date();
-                const month = String(today.getMonth() + 1).padStart(2, '0');
-                const day = String(today.getDate()).padStart(2, '0');
-                const query = `collection:(GratefulDead) AND date:*-${month}-${day}`;
-                const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=downloads+desc&rows=1&output=json`;
-                const response = await fetch(url);
-                const data = await response.json();
-                if (data.response && data.response.docs.length > 0) {
-                    document.getElementById('featured-label').innerText = "✨ On This Day in History ✨";
-                    renderFeaturedCard(data.response.docs[0]);
-                } else { fetchTopChoice(); }
-            } catch (e) { fetchTopChoice(); }
-        }
+<div id="loading" class="hidden flex flex-col items-center py-20">
+<div class="animate-spin rounded-full h-10 w-10 border-t-2 border-red-500 mb-4 border-r-transparent"></div>
+            <p class="text-gray-600 text-xs uppercase tracking-[0.3em]">Opening the Vault...</p>
+            <p class="text-gray-600 text-xs uppercase tracking-[0.3em]">Filtering the Tapes...</p>
+</div>
 
-        async function fetchTopChoice() {
-            const query = `collection:(GratefulDead) AND avg_rating:5 AND downloads:[30000 TO 1000000]`;
-            try {
-                const res = await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=downloads+desc&rows=25&output=json`);
-                const data = await res.json();
-                if (data.response && data.response.docs.length > 0) {
-                    document.getElementById('featured-label').innerText = "⭐ Vault's Top Choice ⭐";
-                    renderFeaturedCard(data.response.docs[Math.floor(Math.random() * data.response.docs.length)]);
+<div id="results" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+        
+<div id="loadMoreContainer" class="flex justify-center mt-12 mb-20 hidden">
+<button onclick="renderNextBatch()" class="border border-red-600 text-red-500 hover:bg-red-600 hover:text-white px-10 py-3 rounded-full font-bold transition-all uppercase tracking-widest text-xs shadow-lg">Load More Shows</button>
+</div>
+@@ -72,22 +71,15 @@ <h2 id="featured-title" class="text-center text-xs font-black uppercase tracking
+const today = new Date();
+const month = String(today.getMonth() + 1).padStart(2, '0');
+const day = String(today.getDate()).padStart(2, '0');
+                
+const query = `collection:(GratefulDead) AND date:*-${month}-${day} AND mediatype:(etree) AND subject:(soundboard)`;
+const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=downloads+desc&rows=1&output=json`;
+
+const response = await fetch(url);
+const data = await response.json();
+                
+if (data.response && data.response.docs.length > 0) {
+document.getElementById('featured-title').innerText = "✨ On This Day in History ✨";
+renderFeaturedCard(data.response.docs[0]);
+                } else {
+                    await fetchTopChoice();
                 }
-            } catch (e) {}
-        }
+            } catch (e) {
+                await fetchTopChoice();
+            }
+                } else { await fetchTopChoice(); }
+            } catch (e) { await fetchTopChoice(); }
+}
 
-        function renderFeaturedCard(show) {
-            document.getElementById('featured-result').innerHTML = `
-                <div class="glass p-10 rounded-3xl gold-glow flex flex-col items-center text-center transition-all hover:scale-[1.01]">
-                    <span class="text-yellow-500 font-mono text-sm font-bold mb-3 uppercase tracking-tighter">${show.date ? show.date.split('T')[0] : 'Legendary'}</span>
-                    <h3 class="font-black text-2xl leading-tight mb-6 text-white">${show.title}</h3>
-                    <p class="text-gray-400 text-[10px] uppercase tracking-widest mb-8 font-bold">${show.venue || 'The Great Beyond'}</p>
-                    <button onclick="playShow('${show.identifier}')" class="bg-yellow-600 hover:bg-yellow-500 text-black font-black py-4 px-10 rounded-2xl transition-all uppercase text-xs tracking-widest shadow-2xl">Stream Now</button>
+async function fetchTopChoice() {
+@@ -96,15 +88,12 @@ <h2 id="featured-title" class="text-center text-xs font-black uppercase tracking
+const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=downloads+desc&rows=30&output=json`;
+const res = await fetch(url);
+const data = await res.json();
+                
+if (data.response && data.response.docs.length > 0) {
+document.getElementById('featured-title').innerText = "⭐ The Vault's Top Choice ⭐";
+const randomShow = data.response.docs[Math.floor(Math.random() * data.response.docs.length)];
+renderFeaturedCard(randomShow);
+}
+            } catch (e) {
+                document.getElementById('featured-container').style.display = 'none';
+            }
+            } catch (e) { document.getElementById('featured-container').style.display = 'none'; }
+}
+
+function renderFeaturedCard(show) {
+@@ -113,123 +102,89 @@ <h2 id="featured-title" class="text-center text-xs font-black uppercase tracking
+                   <span class="text-yellow-500 font-mono text-sm font-bold mb-2 uppercase tracking-tighter">${show.date ? show.date.split('T')[0] : 'Legendary'}</span>
+                   <h3 class="font-black text-xl leading-tight mb-4 text-white">${show.title}</h3>
+                   <p class="text-gray-400 text-[10px] uppercase tracking-widest mb-6">${show.venue || 'The Great Beyond'}</p>
+                    <button onclick="playShow('${show.identifier}')" class="bg-yellow-600 hover:bg-yellow-500 text-black font-black py-3 px-8 rounded-2xl transition-all uppercase text-xs tracking-widest">
+                        Listen Now
+                    </button>
+                </div>
+            `;
+                    <button onclick="playShow('${show.identifier}')" class="bg-yellow-600 hover:bg-yellow-500 text-black font-black py-3 px-8 rounded-2xl transition-all uppercase text-xs tracking-widest">Listen Now</button>
                 </div>`;
-        }
+}
 
+async function handleSearch() {
+    const searchTerm = document.getElementById('searchInput').value.trim();
+    const container = document.getElementById('results');
+    const loading = document.getElementById('loading');
+    const loadMoreBtn = document.getElementById('loadMoreContainer');
+    
+    if (!searchTerm) return;
+
+    loading.classList.remove('hidden');
+    loadMoreBtn.classList.add('hidden');
+    container.innerHTML = '';
+    allShows = [];
+    displayedCount = 0;
+
+    // Start with the base soundboard query
+    let query = 'collection:(GratefulDead) AND subject:(soundboard)';
+    
+    // Parse for Year and Venue
+    const yearMatch = searchTerm.match(/\b\d{4}\b/);
+    const dateMatch = searchTerm.match(/(\d{1,2})[\/\- ](\d{1,2})[\/\- ](\d{4})/);
+    const year = yearMatch ? yearMatch[0] : null;
+    let cleanSearch = searchTerm.replace(/\b\d{4}\b/, '').trim();
+
+    // 1. Date Specificity (e.g. 10/17/1984)
+    if (dateMatch) {
+        const m = dateMatch[1].padStart(2, '0');
+        const d = dateMatch[2].padStart(2, '0');
+        const y = dateMatch[3];
+        query += ` AND date:${y}-${m}-${d}`;
+        cleanSearch = ''; 
+    } 
+    // 2. Year Specificity (e.g. 1984)
+    else if (year) {
+        query += ` AND date:[${year}-01-01 TO ${year}-12-31]`;
+    }
+    
+    // 3. Venue/Keyword Specificity (e.g. Hampton)
+    if (cleanSearch) {
+        // We use a broad search across title and venue fields
+        // This handles "Red Rocks" or "Hampton" much more effectively
+        query += ` AND (title:(${cleanSearch}) OR venue:(${cleanSearch}))`;
+    }
+
+    const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=date+asc&rows=150&output=json`;
+
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (!data.response || !data.response.docs) throw new Error("Empty");
+
+        const uniqueShowsMap = {};
+        data.response.docs.forEach(item => {
+            if (!item.date) return;
+            const dateOnly = item.date.split('T')[0];
+            // Dedupe by picking the most popular version
+            if (!uniqueShowsMap[dateOnly] || item.downloads > uniqueShowsMap[dateOnly].downloads) {
+                uniqueShowsMap[dateOnly] = item;
+            }
+        });
         async function handleSearch() {
             const searchTerm = document.getElementById('searchInput').value.trim();
             const container = document.getElementById('results');
@@ -135,95 +153,91 @@
             allShows = [];
             displayedCount = 0;
 
-            // Broadened Query: Looks at whole GD collection and sorts by date
-            let query = `collection:(GratefulDead)`;
+            let query = 'collection:(GratefulDead) AND subject:(soundboard)';
             const yearMatch = searchTerm.match(/\b\d{4}\b/);
             const dateMatch = searchTerm.match(/(\d{1,2})[\/\- ](\d{1,2})[\/\- ](\d{4})/);
-            
+            const year = yearMatch ? yearMatch[0] : null;
+            let cleanSearch = searchTerm.replace(/\b\d{4}\b/, '').trim();
+
             if (dateMatch) {
                 const m = dateMatch[1].padStart(2, '0'), d = dateMatch[2].padStart(2, '0'), y = dateMatch[3];
                 query += ` AND date:${y}-${m}-${d}`;
-            } else if (yearMatch) {
-                query += ` AND date:[${yearMatch[0]}-01-01 TO ${yearMatch[0]}-12-31]`;
-            }
+                cleanSearch = ''; 
+            } else if (year) { query += ` AND date:[${year}-01-01 TO ${year}-12-31]`; }
             
-            const cleanSearch = searchTerm.replace(/\b\d{4}\b/, '').trim();
-            if (cleanSearch) query += ` AND (title:(${cleanSearch}) OR venue:(${cleanSearch}))`;
+            if (cleanSearch) { query += ` AND (title:(${cleanSearch}) OR venue:(${cleanSearch}))`; }
 
+            const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=date+asc&rows=100&output=json`;
+
+        allShows = Object.values(uniqueShowsMap).sort((a, b) => new Date(a.date) - new Date(b.date));
+        loading.classList.add('hidden');
+        renderNextBatch();
+    } catch (err) {
+        loading.innerHTML = "<p class='text-red-500 font-bold uppercase text-xs'>Vault Timeout - Try Again</p>";
+    }
+}
             try {
-                const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=date+asc&rows=150&output=json`;
                 const response = await fetch(url);
                 const data = await response.json();
-                
-                if (data.response && data.response.docs) {
-                    const uniqueShowsMap = {};
-                    data.response.docs.forEach(item => {
-                        if (!item.date) return;
-                        const dateOnly = item.date.split('T')[0];
-                        // Prioritize soundboards and higher download counts
-                        if (!uniqueShowsMap[dateOnly] || item.downloads > uniqueShowsMap[dateOnly].downloads) {
-                            uniqueShowsMap[dateOnly] = item;
-                        }
-                    });
-                    allShows = Object.values(uniqueShowsMap).sort((a, b) => new Date(a.date) - new Date(b.date));
-                }
-                
+                const uniqueShowsMap = {};
+                data.response.docs.forEach(item => {
+                    if (!item.date) return;
+                    const dateOnly = item.date.split('T')[0];
+                    if (!uniqueShowsMap[dateOnly] || item.downloads > uniqueShowsMap[dateOnly].downloads) {
+                        uniqueShowsMap[dateOnly] = item;
+                    }
+                });
+                allShows = Object.values(uniqueShowsMap).sort((a, b) => new Date(a.date) - new Date(b.date));
                 loading.classList.add('hidden');
                 renderNextBatch();
-                if (allShows.length > 0) {
-                    window.scrollTo({ top: container.offsetTop - 100, behavior: 'smooth' });
-                }
-            } catch (err) { 
-                console.error(err);
-                loading.innerHTML = "<p class='text-red-500 font-bold'>Vault connection error.</p>"; 
-            }
+            } catch (err) { loading.innerHTML = "<p class='text-red-500 font-bold uppercase text-xs'>Vault Timeout - Try Again</p>"; }
         }
 
-        function renderNextBatch() {
-            const container = document.getElementById('results');
-            const loadMoreBtn = document.getElementById('loadMoreContainer');
-            const nextBatch = allShows.slice(displayedCount, displayedCount + BATCH_SIZE);
+function renderNextBatch() {
+const container = document.getElementById('results');
+const loadMoreBtn = document.getElementById('loadMoreContainer');
+const nextBatch = allShows.slice(displayedCount, displayedCount + BATCH_SIZE);
             
-            if (nextBatch.length === 0 && displayedCount === 0) {
-                container.innerHTML = '<p class="col-span-full text-center text-gray-600 py-10 uppercase tracking-widest text-xs font-bold">No recordings found. Try a different year or venue.</p>';
-                return;
-            }
+if (nextBatch.length === 0 && displayedCount === 0) {
+container.innerHTML = '<p class="col-span-full text-center text-gray-600 py-10 uppercase tracking-widest text-xs font-bold">Nothing found.</p>';
+return;
+}
 
-            container.innerHTML += nextBatch.map(show => {
-                const rating = parseFloat(show.avg_rating) || 0;
-                const isTopQuality = rating >= 4.5;
-                return `
-                    <div class="glass p-8 rounded-3xl border border-gray-800 hover:border-red-600/50 transition-all duration-500 flex flex-col justify-between shadow-2xl h-full text-left relative overflow-hidden">
-                        ${isTopQuality ? '<div class="absolute top-0 right-0 bg-yellow-600/80 text-[8px] px-3 py-1 uppercase font-black tracking-widest text-white rounded-bl-xl">Top Quality</div>' : ''}
-                        <div>
-                            <div class="flex justify-between items-center mb-5 text-[10px] font-mono">
-                                <span class="text-red-500 font-bold">${show.date ? show.date.split('T')[0] : 'N/A'}</span>
-                                <span class="text-yellow-500 font-black">★ ${show.avg_rating || 'NR'}</span>
-                            </div>
-                            <h3 class="font-bold text-lg leading-tight mb-3 line-clamp-2 text-gray-100">${show.title}</h3>
-                            <p class="text-gray-500 text-[10px] uppercase tracking-wider mb-8 font-medium">${show.venue || 'Various Venues'}</p>
-                        </div>
-                        <button onclick="playShow('${show.identifier}')" class="w-full bg-white/5 hover:bg-blue-600 text-white font-black py-3 rounded-xl transition-all uppercase text-[10px] tracking-widest border border-white/10 mt-auto">Listen Now</button>
+container.innerHTML += nextBatch.map(show => {
+const rating = parseFloat(show.avg_rating) || 0;
+const isRare = rating < 4.0 && rating > 0;
+                const ratingColor = isRare ? 'text-red-400' : 'text-yellow-500';
+
+return `
+                   <div class="glass p-7 rounded-3xl border border-gray-800 hover:border-red-600/40 transition-all duration-500 flex flex-col justify-between shadow-2xl h-full text-left relative overflow-hidden">
+                       ${isRare ? '<div class="absolute top-0 right-0 bg-red-900/80 text-[8px] px-3 py-1 uppercase font-black tracking-widest text-white rounded-bl-xl border-l border-b border-red-500">Only Copy / Rare</div>' : ''}
+                       <div>
+                           <div class="flex justify-between items-center mb-4 text-[10px] font-mono">
+                               <span class="text-red-500 font-bold">${show.date ? show.date.split('T')[0] : 'N/A'}</span>
+                                <span class="${ratingColor} font-black">★ ${show.avg_rating || 'NR'}</span>
+                                <span class="${isRare ? 'text-red-400' : 'text-yellow-500'} font-black">★ ${show.avg_rating || 'NR'}</span>
+                           </div>
+                           <h3 class="font-bold text-md leading-tight mb-2 line-clamp-2">${show.title}</h3>
+                           <p class="text-gray-500 text-[10px] uppercase tracking-wider mb-6 opacity-60">${show.venue || 'Various Venues'}</p>
+                       </div>
+                       <button onclick="playShow('${show.identifier}')" class="w-full bg-white/5 hover:bg-blue-600 text-white font-black py-2 rounded-xl transition-all uppercase text-[10px] tracking-widest border border-white/10 mt-auto">Stream Now</button>
+                    </div>
+                `;
                     </div>`;
-            }).join('');
-            
-            displayedCount += BATCH_SIZE;
-            if (displayedCount < allShows.length) loadMoreBtn.classList.remove('hidden');
-            else loadMoreBtn.classList.add('hidden');
-        }
+}).join('');
 
-        function playShow(id) {
-            document.getElementById('player-iframe').innerHTML = `<iframe src="https://archive.org/embed/${id}&playlist=1" width="100%" height="150" frameborder="0"></iframe>`;
+displayedCount += BATCH_SIZE;
+if (displayedCount < allShows.length) loadMoreBtn.classList.remove('hidden');
+else loadMoreBtn.classList.add('hidden');
+}
+
+function playShow(id) {
+            const container = document.getElementById('player-container');
+const frame = document.getElementById('player-iframe');
+frame.innerHTML = `<iframe src="https://archive.org/embed/${id}&playlist=1" width="100%" height="150" frameborder="0"></iframe>`;
+            container.classList.remove('hidden');
             document.getElementById('player-container').classList.remove('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
-        function closePlayer() {
-            document.getElementById('player-container').classList.add('hidden');
-            document.getElementById('player-iframe').innerHTML = '';
-        }
-
-        window.onload = function() { spawnNotes(); fetchFeatured(); }
-    </script>
-</body>
-</html>
+    
