@@ -11,15 +11,16 @@
         body { background-color: #000; background-image: radial-gradient(circle at center, #111 0%, #000 100%); }
         .gold-glow { box-shadow: 0 0 30px rgba(234, 179, 8, 0.25); border: 1px solid rgba(234, 179, 8, 0.5); }
         
+        /* Floating Music Notes Animation */
         @keyframes float {
             0% { transform: translateY(0px); opacity: 0; }
             50% { opacity: 1; }
-            100% { transform: translateY(-20px); opacity: 0; }
+            100% { transform: translateY(-40px); opacity: 0; }
         }
-        .note { position: absolute; font-size: 20px; color: #fff; opacity: 0; animation: float 3s infinite linear; }
-        .n1 { left: 40%; animation-delay: 0s; }
-        .n2 { left: 50%; animation-delay: 1s; }
-        .n3 { left: 60%; animation-delay: 2s; }
+        .note { position: absolute; font-size: 24px; color: #fff; opacity: 0; animation: float 3s infinite ease-in-out; pointer-events: none; }
+        .n1 { left: 20%; animation-delay: 0s; }
+        .n2 { left: 45%; animation-delay: 1.2s; }
+        .n3 { left: 75%; animation-delay: 2.1s; }
 
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #ef4444; border-radius: 10px; }
@@ -38,22 +39,18 @@
         <header class="flex flex-col items-center mb-12 gap-4 text-center">
             <img src="https://peaceproject.com/wp-content/uploads/LS455.jpg" alt="Stealie" class="w-32 h-32 md:w-44 md:h-44 drop-shadow-[0_0_25px_rgba(239,68,68,0.4)] rounded-full border-4 border-gray-900">
             
-            <div class="mt-2 relative">
+            <div class="mt-4 relative w-full max-w-2xl">
                 <span class="note n1">♪</span>
                 <span class="note n2">♫</span>
                 <span class="note n3">♩</span>
 
-                <div class="flex items-center justify-center gap-4 md:gap-8">
-                    <h1 class="text-5xl md:text-8xl font-black italic dead-gradient tracking-tighter leading-none uppercase">PLAY</h1>
-                    <div class="w-20 h-20 md:w-32 md:h-32 mb-2">
-                        <img src="https://www.pngall.com/wp-content/uploads/14/Snoopy-Dog-House-PNG-Clipart.png" alt="Snoopy" class="w-full h-full object-contain">
-                    </div>
-                    <h1 class="text-5xl md:text-8xl font-black italic dead-gradient tracking-tighter leading-none uppercase">DEAD</h1>
+                <div class="flex items-center justify-center">
+                    <h1 class="text-6xl md:text-9xl font-black italic dead-gradient tracking-tighter leading-none uppercase">PLAY DEAD</h1>
                 </div>
-                <p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.3em] mt-3">High Fidelity Soundboard Vault</p>
+                <p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.3em] mt-4">High Fidelity Soundboard Vault</p>
             </div>
 
-            <div class="flex gap-2 w-full max-w-md mt-4">
+            <div class="flex gap-2 w-full max-w-md mt-6">
                 <input type="text" id="searchInput" placeholder="Search Year, Venue, or Date..." class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-3 w-full focus:outline-none focus:border-red-600 transition-all text-white">
                 <button onclick="handleSearch()" class="bg-red-600 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-black transition-all duration-300 uppercase text-sm">Search</button>
             </div>
@@ -62,7 +59,7 @@
         <section class="mb-16">
             <h2 class="text-center text-xs font-black uppercase tracking-[0.6em] text-red-500 mb-8 italic">JerK 4likes</h2>
             <div id="jerk-recos-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                </div>
+            </div>
         </section>
 
         <div id="featured-container" class="mb-16">
@@ -85,7 +82,6 @@
         let displayedCount = 0;
         const BATCH_SIZE = 12;
 
-        // JerK's 4 Likes - Direct IDs
         const jerkLikes = [
             { id: 'gd72-08-27.sbd.rebel.312.sbeok.shnf', label: 'Pinnacle 72', date: '8/27/72 Veneta' },
             { id: 'gd77-05-08.sbd.hicks.4982.sbeok.shnf', label: 'The Holy Grail', date: '5/8/77 Cornell' },
@@ -95,9 +91,7 @@
 
         function initJerkRecos() {
             const container = document.getElementById('jerk-recos-container');
-            // Shuffle the 4 likes
-            const shuffled = jerkLikes.sort(() => 0.5 - Math.random());
-            
+            const shuffled = [...jerkLikes].sort(() => 0.5 - Math.random());
             container.innerHTML = shuffled.map(reco => `
                 <button onclick="playShow('${reco.id}')" class="glass p-5 rounded-2xl border border-gray-800 hover:border-red-600 hover:scale-[1.02] transition-all text-left group">
                     <p class="text-[9px] text-red-400 font-bold uppercase mb-1">${reco.label}</p>
@@ -167,16 +161,11 @@
             if (dateMatch) {
                 const m = dateMatch[1].padStart(2, '0'), d = dateMatch[2].padStart(2, '0'), y = dateMatch[3];
                 query += ` AND date:${y}-${m}-${d}`;
-            } else if (year) {
-                query += ` AND date:[${year}-01-01 TO ${year}-12-31]`;
-            }
-            if (cleanSearch) {
-                query += ` AND (title:(${cleanSearch}) OR venue:(${cleanSearch}))`;
-            }
-
-            const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=date+asc&rows=100&output=json`;
+            } else if (year) { query += ` AND date:[${year}-01-01 TO ${year}-12-31]`; }
+            if (cleanSearch) { query += ` AND (title:(${cleanSearch}) OR venue:(${cleanSearch}))`; }
 
             try {
+                const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=date+asc&rows=100&output=json`;
                 const response = await fetch(url);
                 const data = await response.json();
                 const uniqueShowsMap = {};
@@ -190,15 +179,18 @@
                 allShows = Object.values(uniqueShowsMap).sort((a, b) => new Date(a.date) - new Date(b.date));
                 loading.classList.add('hidden');
                 renderNextBatch();
-            } catch (err) { 
-                loading.innerHTML = "<p class='text-red-500'>Vault Timeout</p>"; 
-            }
+                window.scrollTo({ top: container.offsetTop - 100, behavior: 'smooth' });
+            } catch (err) { loading.innerHTML = "<p class='text-red-500'>Vault Timeout</p>"; }
         }
 
         function renderNextBatch() {
             const container = document.getElementById('results');
             const loadMoreBtn = document.getElementById('loadMoreContainer');
             const nextBatch = allShows.slice(displayedCount, displayedCount + BATCH_SIZE);
+            if (nextBatch.length === 0 && displayedCount === 0) {
+                container.innerHTML = '<p class="col-span-full text-center text-gray-600 py-10 uppercase tracking-widest text-xs font-bold">Nothing found.</p>';
+                return;
+            }
             container.innerHTML += nextBatch.map(show => {
                 const isRare = parseFloat(show.avg_rating) < 4.0 && parseFloat(show.avg_rating) > 0;
                 return `
@@ -228,13 +220,4 @@
         }
 
         function closePlayer() {
-            document.getElementById('player-container').classList.add('hidden');
-            document.getElementById('player-iframe').innerHTML = '';
-        }
-
-        // Initialize
-        initJerkRecos();
-        fetchFeatured();
-    </script>
-</body>
-</html>
+            
