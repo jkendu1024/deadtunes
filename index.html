@@ -11,11 +11,10 @@
         body { background-color: #000; background-image: radial-gradient(circle at center, #111 0%, #000 100%); }
         .gold-glow { box-shadow: 0 0 30px rgba(234, 179, 8, 0.25); border: 1px solid rgba(234, 179, 8, 0.5); }
         
-        /* Music Notes Animation */
         @keyframes float {
-            0% { transform: translateY(0px) opacity(0); }
+            0% { transform: translateY(0px); opacity: 0; }
             50% { opacity: 1; }
-            100% { transform: translateY(-20px); opacity(0); }
+            100% { transform: translateY(-20px); opacity: 0; }
         }
         .note { position: absolute; font-size: 20px; color: #fff; opacity: 0; animation: float 3s infinite linear; }
         .n1 { left: 40%; animation-delay: 0s; }
@@ -46,61 +45,38 @@
 
                 <div class="flex items-center justify-center gap-4 md:gap-8">
                     <h1 class="text-5xl md:text-8xl font-black italic dead-gradient tracking-tighter leading-none uppercase">PLAY</h1>
-                    
                     <div class="w-20 h-20 md:w-32 md:h-32 mb-2">
                         <img src="https://www.pngall.com/wp-content/uploads/14/Snoopy-Dog-House-PNG-Clipart.png" alt="Snoopy" class="w-full h-full object-contain">
                     </div>
-
                     <h1 class="text-5xl md:text-8xl font-black italic dead-gradient tracking-tighter leading-none uppercase">DEAD</h1>
                 </div>
-
                 <p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.3em] mt-3">High Fidelity Soundboard Vault</p>
-                
-                <div class="mt-6 flex flex-col items-center gap-1">
-                    <p class="text-[9px] text-gray-600 uppercase tracking-[0.2em] font-bold italic">Unique Travelers</p>
-                    <div class="bg-gray-900/80 px-4 py-2 rounded-xl border border-gray-800 flex justify-center shadow-inner">
-                        <img src="https://count.getloli.com/get/@jk_playdead_vault_snoopy?theme=asoul&type=uv" alt="Unique Visitors" class="h-10 opacity-90 brightness-110">
-                    </div>
-                </div>
             </div>
 
             <div class="flex gap-2 w-full max-w-md mt-4">
-                <input type="text" id="searchInput" placeholder="Search (e.g., 10/17/1984 or Hampton)" class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-3 w-full focus:outline-none focus:border-red-600 transition-all text-white placeholder-gray-600">
+                <input type="text" id="searchInput" placeholder="Search Year, Venue, or Date..." class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-3 w-full focus:outline-none focus:border-red-600 transition-all text-white">
                 <button onclick="handleSearch()" class="bg-red-600 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-black transition-all duration-300 uppercase text-sm">Search</button>
             </div>
         </header>
 
         <section class="mb-16">
-            <h2 class="text-center text-xs font-black uppercase tracking-[0.6em] text-red-500 mb-8 italic">JerK Recos</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <button onclick="quickSearch('veneta')" class="glass p-5 rounded-2xl border border-gray-800 hover:border-red-600 hover:scale-[1.02] transition-all text-left group">
-                    <p class="text-[9px] text-red-400 font-bold uppercase mb-1">Pinnacle '72</p>
-                    <p class="font-bold text-sm text-gray-200 group-hover:text-white">Veneta, OR 8/27/72</p>
-                </button>
-                <button onclick="quickSearch('cornell')" class="glass p-5 rounded-2xl border border-gray-800 hover:border-red-600 hover:scale-[1.02] transition-all text-left group">
-                    <p class="text-[9px] text-red-400 font-bold uppercase mb-1">The Holy Grail</p>
-                    <p class="font-bold text-sm text-gray-200 group-hover:text-white">Barton Hall 5/8/77</p>
-                </button>
-                <button onclick="quickSearch('fillmore')" class="glass p-5 rounded-2xl border border-gray-800 hover:border-red-600 hover:scale-[1.02] transition-all text-left group">
-                    <p class="text-[9px] text-red-400 font-bold uppercase mb-1">Acoustic Peak</p>
-                    <p class="font-bold text-sm text-gray-200 group-hover:text-white">Fillmore East 5/15/70</p>
-                </button>
-            </div>
+            <h2 class="text-center text-xs font-black uppercase tracking-[0.6em] text-red-500 mb-8 italic">JerK 4likes</h2>
+            <div id="jerk-recos-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                </div>
         </section>
 
         <div id="featured-container" class="mb-16">
-            <h2 id="featured-title" class="text-center text-xs font-black uppercase tracking-[0.4em] text-yellow-500 mb-6 italic">Opening the Vault...</h2>
+            <h2 id="featured-title" class="text-center text-xs font-black uppercase tracking-[0.4em] text-yellow-500 mb-6 italic">Vault of the Day</h2>
             <div id="featured-result" class="max-w-md mx-auto"></div>
         </div>
 
         <div id="loading" class="hidden flex flex-col items-center py-20">
             <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-red-500 mb-4 border-r-transparent"></div>
-            <p class="text-gray-600 text-xs uppercase tracking-[0.3em]">Filtering the Tapes...</p>
         </div>
 
         <div id="results" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         <div id="loadMoreContainer" class="flex justify-center mt-12 mb-20 hidden">
-            <button onclick="renderNextBatch()" class="border border-red-600 text-red-500 hover:bg-red-600 hover:text-white px-10 py-3 rounded-full font-bold transition-all uppercase tracking-widest text-xs shadow-lg">Load More Shows</button>
+            <button onclick="renderNextBatch()" class="border border-red-600 text-red-500 hover:bg-red-600 hover:text-white px-10 py-3 rounded-full font-bold transition-all uppercase tracking-widest text-xs shadow-lg">Load More</button>
         </div>
     </div>
 
@@ -109,19 +85,25 @@
         let displayedCount = 0;
         const BATCH_SIZE = 12;
 
-        const jkPicks = {
-            'veneta': 'gd72-08-27.sbd.rebel.312.sbeok.shnf',
-            'cornell': 'gd77-05-08.sbd.hicks.4982.sbeok.shnf',
-            'fillmore': 'gd70-05-15.sbd.rebel.90.sbeok.shnf'
-        };
+        // JerK's 4 Likes - Direct IDs
+        const jerkLikes = [
+            { id: 'gd72-08-27.sbd.rebel.312.sbeok.shnf', label: 'Pinnacle 72', date: '8/27/72 Veneta' },
+            { id: 'gd77-05-08.sbd.hicks.4982.sbeok.shnf', label: 'The Holy Grail', date: '5/8/77 Cornell' },
+            { id: 'gd70-05-15.sbd.rebel.90.sbeok.shnf', label: 'Acoustic Peak', date: '5/15/70 Fillmore' },
+            { id: 'gd1989-07-07.sbd.walker-scotton.revised.97658.flac16', label: '89 Heat', date: '7/7/89 JFK Stadium' }
+        ];
 
-        function quickSearch(key) {
-            if (jkPicks[key]) {
-                playShow(jkPicks[key]);
-            } else {
-                document.getElementById('searchInput').value = key;
-                handleSearch();
-            }
+        function initJerkRecos() {
+            const container = document.getElementById('jerk-recos-container');
+            // Shuffle the 4 likes
+            const shuffled = jerkLikes.sort(() => 0.5 - Math.random());
+            
+            container.innerHTML = shuffled.map(reco => `
+                <button onclick="playShow('${reco.id}')" class="glass p-5 rounded-2xl border border-gray-800 hover:border-red-600 hover:scale-[1.02] transition-all text-left group">
+                    <p class="text-[9px] text-red-400 font-bold uppercase mb-1">${reco.label}</p>
+                    <p class="font-bold text-sm text-gray-200 group-hover:text-white">${reco.date}</p>
+                </button>
+            `).join('');
         }
 
         async function fetchFeatured() {
@@ -134,7 +116,7 @@
                 const response = await fetch(url);
                 const data = await response.json();
                 if (data.response && data.response.docs.length > 0) {
-                    document.getElementById('featured-title').innerText = "✨ On This Day in History ✨";
+                    document.getElementById('featured-title').innerText = "✨ Vault of the Day ✨";
                     renderFeaturedCard(data.response.docs[0]);
                 } else { await fetchTopChoice(); }
             } catch (e) { await fetchTopChoice(); }
@@ -147,7 +129,7 @@
                 const res = await fetch(url);
                 const data = await res.json();
                 if (data.response && data.response.docs.length > 0) {
-                    document.getElementById('featured-title').innerText = "⭐ The Vault's Top Choice ⭐";
+                    document.getElementById('featured-title').innerText = "⭐ Closest Choice ⭐";
                     const randomShow = data.response.docs[Math.floor(Math.random() * data.response.docs.length)];
                     renderFeaturedCard(randomShow);
                 }
@@ -170,7 +152,6 @@
             const loading = document.getElementById('loading');
             const loadMoreBtn = document.getElementById('loadMoreContainer');
             if (!searchTerm) return;
-            
             loading.classList.remove('hidden');
             loadMoreBtn.classList.add('hidden');
             container.innerHTML = '';
@@ -186,11 +167,9 @@
             if (dateMatch) {
                 const m = dateMatch[1].padStart(2, '0'), d = dateMatch[2].padStart(2, '0'), y = dateMatch[3];
                 query += ` AND date:${y}-${m}-${d}`;
-                cleanSearch = ''; 
             } else if (year) {
                 query += ` AND date:[${year}-01-01 TO ${year}-12-31]`;
             }
-            
             if (cleanSearch) {
                 query += ` AND (title:(${cleanSearch}) OR venue:(${cleanSearch}))`;
             }
@@ -211,9 +190,8 @@
                 allShows = Object.values(uniqueShowsMap).sort((a, b) => new Date(a.date) - new Date(b.date));
                 loading.classList.add('hidden');
                 renderNextBatch();
-                window.scrollTo({ top: loading.offsetTop - 100, behavior: 'smooth' });
             } catch (err) { 
-                loading.innerHTML = "<p class='text-red-500 font-bold uppercase text-xs'>Vault Timeout - Try Again</p>"; 
+                loading.innerHTML = "<p class='text-red-500'>Vault Timeout</p>"; 
             }
         }
 
@@ -221,16 +199,11 @@
             const container = document.getElementById('results');
             const loadMoreBtn = document.getElementById('loadMoreContainer');
             const nextBatch = allShows.slice(displayedCount, displayedCount + BATCH_SIZE);
-            if (nextBatch.length === 0 && displayedCount === 0) {
-                container.innerHTML = '<p class="col-span-full text-center text-gray-600 py-10 uppercase tracking-widest text-xs font-bold">Nothing found.</p>';
-                return;
-            }
             container.innerHTML += nextBatch.map(show => {
-                const rating = parseFloat(show.avg_rating) || 0;
-                const isRare = rating < 4.0 && rating > 0;
+                const isRare = parseFloat(show.avg_rating) < 4.0 && parseFloat(show.avg_rating) > 0;
                 return `
                     <div class="glass p-7 rounded-3xl border border-gray-800 hover:border-red-600/40 transition-all duration-500 flex flex-col justify-between shadow-2xl h-full text-left relative overflow-hidden">
-                        ${isRare ? '<div class="absolute top-0 right-0 bg-red-900/80 text-[8px] px-3 py-1 uppercase font-black tracking-widest text-white rounded-bl-xl border-l border-b border-red-500">Only Copy / Rare</div>' : ''}
+                        ${isRare ? '<div class="absolute top-0 right-0 bg-red-900/80 text-[8px] px-3 py-1 uppercase font-black tracking-widest text-white rounded-bl-xl">Rare Copy</div>' : ''}
                         <div>
                             <div class="flex justify-between items-center mb-4 text-[10px] font-mono">
                                 <span class="text-red-500 font-bold">${show.date ? show.date.split('T')[0] : 'N/A'}</span>
@@ -259,6 +232,8 @@
             document.getElementById('player-iframe').innerHTML = '';
         }
 
+        // Initialize
+        initJerkRecos();
         fetchFeatured();
     </script>
 </body>
