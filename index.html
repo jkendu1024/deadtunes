@@ -40,7 +40,7 @@
                 <div class="mt-8 flex flex-col items-center gap-1">
                     <p class="text-[9px] text-gray-600 uppercase tracking-[0.2em] font-bold italic">Unique Travelers</p>
                     <div class="bg-gray-900/80 px-6 py-3 rounded-2xl border border-gray-800 flex justify-center shadow-inner">
-                        <img src="https://count.getloli.com/get/@jk_playdead_v_fixed_final?theme=asoul&type=uv" alt="Counter" class="h-10 opacity-90 brightness-110">
+                        <img src="https://count.getloli.com/get/@jk_playdead_vault_fixed_final?theme=asoul&type=uv" alt="Counter" class="h-10 opacity-90 brightness-110">
                     </div>
                 </div>
             </div>
@@ -90,7 +90,7 @@
                 const today = new Date();
                 const month = String(today.getMonth() + 1).padStart(2, '0');
                 const day = String(today.getDate()).padStart(2, '0');
-                const query = `collection:(GratefulDead) AND date:*-${month}-${day} AND mediatype:(etree)`;
+                const query = `collection:(GratefulDead) AND date:*-${month}-${day}`;
                 const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=downloads+desc&rows=1&output=json`;
                 const response = await fetch(url);
                 const data = await response.json();
@@ -106,7 +106,7 @@
             try {
                 const res = await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=downloads+desc&rows=25&output=json`);
                 const data = await res.json();
-                if (data.response.docs.length > 0) {
+                if (data.response && data.response.docs.length > 0) {
                     document.getElementById('featured-label').innerText = "⭐ Vault's Top Choice ⭐";
                     renderFeaturedCard(data.response.docs[Math.floor(Math.random() * data.response.docs.length)]);
                 }
@@ -135,13 +135,18 @@
             allShows = [];
             displayedCount = 0;
 
-            let query = 'collection:(GratefulDead) AND (mediatype:etree OR subject:soundboard)';
+            // Broadened Query: Looks at whole GD collection and sorts by date
+            let query = `collection:(GratefulDead)`;
             const yearMatch = searchTerm.match(/\b\d{4}\b/);
             const dateMatch = searchTerm.match(/(\d{1,2})[\/\- ](\d{1,2})[\/\- ](\d{4})/);
+            
             if (dateMatch) {
                 const m = dateMatch[1].padStart(2, '0'), d = dateMatch[2].padStart(2, '0'), y = dateMatch[3];
                 query += ` AND date:${y}-${m}-${d}`;
-            } else if (yearMatch) { query += ` AND date:[${yearMatch[0]}-01-01 TO ${yearMatch[0]}-12-31]`; }
+            } else if (yearMatch) {
+                query += ` AND date:[${yearMatch[0]}-01-01 TO ${yearMatch[0]}-12-31]`;
+            }
+            
             const cleanSearch = searchTerm.replace(/\b\d{4}\b/, '').trim();
             if (cleanSearch) query += ` AND (title:(${cleanSearch}) OR venue:(${cleanSearch}))`;
 
@@ -149,35 +154,47 @@
                 const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=date+asc&rows=150&output=json`;
                 const response = await fetch(url);
                 const data = await response.json();
+                
                 if (data.response && data.response.docs) {
                     const uniqueShowsMap = {};
                     data.response.docs.forEach(item => {
                         if (!item.date) return;
                         const dateOnly = item.date.split('T')[0];
-                        if (!uniqueShowsMap[dateOnly] || item.downloads > uniqueShowsMap[dateOnly].downloads) uniqueShowsMap[dateOnly] = item;
+                        // Prioritize soundboards and higher download counts
+                        if (!uniqueShowsMap[dateOnly] || item.downloads > uniqueShowsMap[dateOnly].downloads) {
+                            uniqueShowsMap[dateOnly] = item;
+                        }
                     });
                     allShows = Object.values(uniqueShowsMap).sort((a, b) => new Date(a.date) - new Date(b.date));
                 }
+                
                 loading.classList.add('hidden');
                 renderNextBatch();
-                if (allShows.length > 0) window.scrollTo({ top: container.offsetTop - 100, behavior: 'smooth' });
-            } catch (err) { loading.innerHTML = "<p class='text-red-500 font-bold'>Vault connection error.</p>"; }
+                if (allShows.length > 0) {
+                    window.scrollTo({ top: container.offsetTop - 100, behavior: 'smooth' });
+                }
+            } catch (err) { 
+                console.error(err);
+                loading.innerHTML = "<p class='text-red-500 font-bold'>Vault connection error.</p>"; 
+            }
         }
 
         function renderNextBatch() {
             const container = document.getElementById('results');
             const loadMoreBtn = document.getElementById('loadMoreContainer');
             const nextBatch = allShows.slice(displayedCount, displayedCount + BATCH_SIZE);
+            
             if (nextBatch.length === 0 && displayedCount === 0) {
                 container.innerHTML = '<p class="col-span-full text-center text-gray-600 py-10 uppercase tracking-widest text-xs font-bold">No recordings found. Try a different year or venue.</p>';
                 return;
             }
+
             container.innerHTML += nextBatch.map(show => {
                 const rating = parseFloat(show.avg_rating) || 0;
-                const isGood = rating >= 4.5;
+                const isTopQuality = rating >= 4.5;
                 return `
                     <div class="glass p-8 rounded-3xl border border-gray-800 hover:border-red-600/50 transition-all duration-500 flex flex-col justify-between shadow-2xl h-full text-left relative overflow-hidden">
-                        ${isGood ? '<div class="absolute top-0 right-0 bg-yellow-600/80 text-[8px] px-3 py-1 uppercase font-black tracking-widest text-white rounded-bl-xl">Top Quality</div>' : ''}
+                        ${isTopQuality ? '<div class="absolute top-0 right-0 bg-yellow-600/80 text-[8px] px-3 py-1 uppercase font-black tracking-widest text-white rounded-bl-xl">Top Quality</div>' : ''}
                         <div>
                             <div class="flex justify-between items-center mb-5 text-[10px] font-mono">
                                 <span class="text-red-500 font-bold">${show.date ? show.date.split('T')[0] : 'N/A'}</span>
@@ -189,6 +206,7 @@
                         <button onclick="playShow('${show.identifier}')" class="w-full bg-white/5 hover:bg-blue-600 text-white font-black py-3 rounded-xl transition-all uppercase text-[10px] tracking-widest border border-white/10 mt-auto">Listen Now</button>
                     </div>`;
             }).join('');
+            
             displayedCount += BATCH_SIZE;
             if (displayedCount < allShows.length) loadMoreBtn.classList.remove('hidden');
             else loadMoreBtn.classList.add('hidden');
