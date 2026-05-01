@@ -9,44 +9,51 @@
         .glass { background: rgba(31, 41, 55, 0.7); backdrop-filter: blur(10px); }
         .dead-gradient { background: linear-gradient(90deg, #ef4444, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
-        /* Deep radial background */
-        body { background-color: #000; background-image: radial-gradient(circle at center, #111 0%, #000 100%); position: relative; min-h-screen: 100vh; overflow-x: hidden; }
+        body { 
+            background-color: #000; 
+            background-image: radial-gradient(circle at center, #111 0%, #000 100%); 
+            position: relative; 
+            min-height: 100vh; 
+            overflow-x: hidden; 
+        }
         
-        /* Slick Search Glow */
-        .search-focus:focus-within { box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); border-color: #ef4444; }
+        .search-focus:focus-within { box-shadow: 0 0 20px rgba(239, 68, 68, 0.2); border-color: #ef4444; }
 
-        /* Animation Keyframes (used by both global and header notes) */
-        @keyframes floatNotes {
-            0% { transform: translateY(0px) rotate(0deg); opacity: 0; }
-            10% { opacity: 0.6; }
-            90% { opacity: 0.6; }
-            100% { transform: translateY(-150px) rotate(20deg); opacity: 0; }
+        /* Smooth Ambient Notes */
+        @keyframes drift {
+            0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.25; }
+            90% { opacity: 0.25; }
+            100% { transform: translateY(-20vh) rotate(360deg); opacity: 0; }
         }
 
-        /* --- Global Background Notes (All over the page) --- */
-        #global-note-field { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
-        .global-note { position: absolute; font-size: 20px; color: rgba(255, 255, 255, 0.15); /* very faint */ animation: floatNotes infinite linear; }
+        #note-canvas { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            pointer-events: none; 
+            z-index: 0; 
+        }
 
-        /* --- Header Notes (Floating around the Title) --- */
-        .header-notes-field { position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 0; top: 0; left: 0; }
-        .header-note { position: absolute; font-size: 28px; color: #fff; opacity: 0; animation: floatNotes 4s infinite ease-in-out; }
-        
-        /* Positioning logic for header notes to float AROUND the title */
-        .hn1 { left: -10%; top: 20%; animation-delay: 0s; }
-        .hn2 { right: -10%; top: 40%; animation-delay: 1.5s; font-size: 32px; }
-        .hn3 { left: 50%; bottom: -10%; transform: translateX(-50%); animation-delay: 2.8s; font-size: 24px; }
+        .ambient-note { 
+            position: absolute; 
+            color: #fff; 
+            filter: blur(1px); 
+            animation: drift infinite linear; 
+            font-family: serif;
+        }
 
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #ef4444; border-radius: 10px; }
         
-        /* Ensure content stays above the global note field */
         header, section, div { position: relative; z-index: 10; }
     </style>
 </head>
 <body class="text-gray-100 min-h-screen font-sans">
 
-    <div id="global-note-field">
-        </div>
+    <div id="note-canvas"></div>
 
     <div id="player-container" class="sticky top-0 z-50 w-full bg-gray-900 border-b border-red-900 hidden shadow-2xl">
         <div class="max-w-6xl mx-auto p-2 flex flex-col">
@@ -59,32 +66,26 @@
         <header class="flex flex-col items-center mb-16 gap-6 text-center">
             <img src="https://peaceproject.com/wp-content/uploads/LS455.jpg" alt="Stealie" class="w-32 h-32 md:w-44 md:h-44 drop-shadow-[0_0_25px_rgba(239,68,68,0.4)] rounded-full border-4 border-gray-900">
             
-            <div class="relative w-full max-w-2xl px-12">
-                <div class="header-notes-field">
-                    <span class="header-note hn1">♪</span>
-                    <span class="header-note hn2">♫</span>
-                    <span class="header-note hn3">♩</span>
-                </div>
-
-                <h1 class="text-7xl md:text-9xl font-black italic dead-gradient tracking-tighter leading-none uppercase z-10">PLAY DEAD</h1>
-                <p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.4em] mt-4 z-10">High Fidelity Soundboard Vault powered by Jeremy</p>
+            <div class="relative w-full max-w-2xl">
+                <h1 class="text-7xl md:text-9xl font-black italic dead-gradient tracking-tighter leading-none uppercase">PLAY DEAD</h1>
+                <p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.4em] mt-4">High Fidelity Soundboard Vault powered by Jeremy</p>
                 
-                <div class="mt-8 flex flex-col items-center gap-1 z-10">
+                <div class="mt-8 flex flex-col items-center gap-1">
                     <p class="text-[9px] text-gray-600 uppercase tracking-[0.2em] font-bold italic">Unique Travelers</p>
                     <div class="bg-gray-900/80 px-6 py-3 rounded-2xl border border-gray-800 flex justify-center shadow-inner">
-                        <img src="https://count.getloli.com/get/@jk_playdead_v_notes?theme=asoul&type=uv" alt="Counter" class="h-10 opacity-90 brightness-110">
+                        <img src="https://count.getloli.com/get/@jk_playdead_v_final_refined?theme=asoul&type=uv" alt="Counter" class="h-10 opacity-90 brightness-110">
                     </div>
                 </div>
             </div>
 
-            <div class="flex flex-col md:flex-row gap-3 w-full max-w-lg mt-4 search-focus transition-all duration-300 p-1 bg-gray-900 border border-gray-800 rounded-2xl z-20">
+            <div class="flex flex-col md:flex-row gap-3 w-full max-w-lg mt-4 search-focus transition-all duration-300 p-1 bg-gray-900 border border-gray-800 rounded-2xl">
                 <input type="text" id="searchInput" placeholder="Search Year, Venue, or Date..." class="bg-transparent px-5 py-4 w-full focus:outline-none text-white placeholder-gray-600 font-medium">
                 <button onclick="handleSearch()" class="bg-red-600 hover:bg-blue-600 text-white px-8 py-4 rounded-xl font-black transition-all duration-300 uppercase text-sm tracking-widest shadow-lg">Search</button>
             </div>
         </header>
 
         <div id="featured-container" class="mb-20">
-            <h2 class="text-center text-xs font-black uppercase tracking-[0.6em] text-yellow-500 mb-8 italic">Vault of the Day</h2>
+            <h2 id="featured-label" class="text-center text-xs font-black uppercase tracking-[0.6em] text-yellow-500 mb-8 italic text-shadow-sm">Vault of the Day</h2>
             <div id="featured-result" class="max-w-md mx-auto"></div>
         </div>
 
@@ -104,28 +105,23 @@
         let displayedCount = 0;
         const BATCH_SIZE = 12;
 
-        // --- Create faint, random notes all over the page background ---
-        function populateGlobalNotes() {
-            const field = document.getElementById('global-note-field');
-            const noteTypes = ['♪', '♫', '♩', '♬', '♭', '♮'];
-            const noteCount = 20; // Adjusted for "all over, but not too much"
-
-            for (let i = 0; i < noteCount; i++) {
-                const note = document.createElement('span');
-                note.classList.add('global-note');
-                note.innerText = noteTypes[Math.floor(Math.random() * noteTypes.length)];
-                
-                // Randomly distribute across the page
-                note.style.left = Math.random() * 100 + '%';
-                note.style.top = Math.random() * 120 + '%'; // Spread vertically, some start below the fold
-                
-                // Randomly vary the animation time and delay for natural look
-                const duration = 15 + Math.random() * 10; // 15s to 25s for slow, faint float
-                const delay = Math.random() * 20; // 0s to 20s delay
-                note.style.animationDuration = duration + 's';
-                note.style.animationDelay = delay + 's';
-                
-                field.appendChild(note);
+        function spawnNotes() {
+            const canvas = document.getElementById('note-canvas');
+            const icons = ['♪', '♫', '♩', '♬'];
+            const count = 18; 
+            for (let i = 0; i < count; i++) {
+                const note = document.createElement('div');
+                note.className = 'ambient-note';
+                note.innerText = icons[Math.floor(Math.random() * icons.length)];
+                const size = Math.random() * (28 - 14) + 14;
+                const left = Math.random() * 100;
+                const duration = Math.random() * (25 - 12) + 12;
+                const delay = Math.random() * 20;
+                note.style.fontSize = `${size}px`;
+                note.style.left = `${left}%`;
+                note.style.animationDuration = `${duration}s`;
+                note.style.animationDelay = `-${delay}s`;
+                canvas.appendChild(note);
             }
         }
 
@@ -139,24 +135,22 @@
                 
                 const response = await fetch(url);
                 const data = await response.json();
-                
-                if (data.response && data.response.docs.length > 0) {
+                if (data.response && data.response.docs && data.response.docs.length > 0) {
+                    document.getElementById('featured-label').innerText = "✨ On This Day in History ✨";
                     renderFeaturedCard(data.response.docs[0]);
                 } else {
                     fetchTopChoice();
                 }
-            } catch (e) {
-                fetchTopChoice();
-            }
+            } catch (e) { fetchTopChoice(); }
         }
 
         async function fetchTopChoice() {
-            const query = `collection:(GratefulDead) AND avg_rating:5 AND downloads:[30000 TO 1000000]`;
-            const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=downloads+desc&rows=20&output=json`;
+            const query = `collection:(GratefulDead) AND avg_rating:5 AND downloads:[40000 TO 1000000]`;
             try {
-                const res = await fetch(url);
+                const res = await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=downloads+desc&rows=25&output=json`);
                 const data = await res.json();
-                if (data.response.docs.length > 0) {
+                if (data.response && data.response.docs.length > 0) {
+                    document.getElementById('featured-label').innerText = "⭐ Vault's Top Choice ⭐";
                     const randomShow = data.response.docs[Math.floor(Math.random() * data.response.docs.length)];
                     renderFeaturedCard(randomShow);
                 }
@@ -165,11 +159,11 @@
 
         function renderFeaturedCard(show) {
             document.getElementById('featured-result').innerHTML = `
-                <div class="glass p-10 rounded-3xl gold-glow flex flex-col items-center text-center transition-all hover:scale-[1.02] z-10">
+                <div class="glass p-10 rounded-3xl gold-glow flex flex-col items-center text-center transition-all hover:scale-[1.01]">
                     <span class="text-yellow-500 font-mono text-sm font-bold mb-3 uppercase tracking-tighter">${show.date ? show.date.split('T')[0] : 'Legendary'}</span>
                     <h3 class="font-black text-2xl leading-tight mb-6 text-white">${show.title}</h3>
                     <p class="text-gray-400 text-[10px] uppercase tracking-widest mb-8 font-bold">${show.venue || 'The Great Beyond'}</p>
-                    <button onclick="playShow('${show.identifier}')" class="bg-yellow-600 hover:bg-yellow-500 text-black font-black py-4 px-10 rounded-2xl transition-all uppercase text-xs tracking-widest shadow-2xl">Stream This Show</button>
+                    <button onclick="playShow('${show.identifier}')" class="bg-yellow-600 hover:bg-yellow-500 text-black font-black py-4 px-10 rounded-2xl transition-all uppercase text-xs tracking-widest shadow-2xl">Stream Now</button>
                 </div>`;
         }
 
@@ -178,9 +172,7 @@
             const container = document.getElementById('results');
             const loading = document.getElementById('loading');
             const loadMoreBtn = document.getElementById('loadMoreContainer');
-            
             if (!searchTerm) return;
-            
             loading.classList.remove('hidden');
             loadMoreBtn.classList.add('hidden');
             container.innerHTML = '';
@@ -190,40 +182,34 @@
             let query = 'collection:(GratefulDead) AND subject:(soundboard)';
             const yearMatch = searchTerm.match(/\b\d{4}\b/);
             const dateMatch = searchTerm.match(/(\d{1,2})[\/\- ](\d{1,2})[\/\- ](\d{4})/);
-            const year = yearMatch ? yearMatch[0] : null;
-            let cleanSearch = searchTerm.replace(/\b\d{4}\b/, '').trim();
-
+            
             if (dateMatch) {
                 const m = dateMatch[1].padStart(2, '0'), d = dateMatch[2].padStart(2, '0'), y = dateMatch[3];
                 query += ` AND date:${y}-${m}-${d}`;
-            } else if (year) { 
-                query += ` AND date:[${year}-01-01 TO ${year}-12-31]`; 
+            } else if (yearMatch) {
+                query += ` AND date:[${yearMatch[0]}-01-01 TO ${yearMatch[0]}-12-31]`;
             }
             
-            if (cleanSearch) { 
-                query += ` AND (title:(${cleanSearch}) OR venue:(${cleanSearch}))`; 
-            }
+            const cleanSearch = searchTerm.replace(/\b\d{4}\b/, '').trim();
+            if (cleanSearch) query += ` AND (title:(${cleanSearch}) OR venue:(${cleanSearch}))`;
 
             try {
-                const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=date+asc&rows=150&output=json`;
-                const response = await fetch(url);
+                const response = await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=date+asc&rows=150&output=json`);
                 const data = await response.json();
-                
-                const uniqueShowsMap = {};
-                data.response.docs.forEach(item => {
-                    if (!item.date) return;
-                    const dateOnly = item.date.split('T')[0];
-                    if (!uniqueShowsMap[dateOnly] || item.downloads > uniqueShowsMap[dateOnly].downloads) {
-                        uniqueShowsMap[dateOnly] = item;
-                    }
-                });
-
-                allShows = Object.values(uniqueShowsMap).sort((a, b) => new Date(a.date) - new Date(b.date));
+                if (data.response && data.response.docs) {
+                    const uniqueShowsMap = {};
+                    data.response.docs.forEach(item => {
+                        if (!item.date) return;
+                        const dateOnly = item.date.split('T')[0];
+                        if (!uniqueShowsMap[dateOnly] || item.downloads > uniqueShowsMap[dateOnly].downloads) uniqueShowsMap[dateOnly] = item;
+                    });
+                    allShows = Object.values(uniqueShowsMap).sort((a, b) => new Date(a.date) - new Date(b.date));
+                }
                 loading.classList.add('hidden');
                 renderNextBatch();
                 window.scrollTo({ top: container.offsetTop - 100, behavior: 'smooth' });
             } catch (err) { 
-                loading.innerHTML = "<p class='text-red-500 font-bold'>Vault connection error.</p>"; 
+                loading.innerHTML = "<p class='text-red-500 font-bold'>Error connecting to the vault.</p>"; 
             }
         }
 
@@ -231,17 +217,15 @@
             const container = document.getElementById('results');
             const loadMoreBtn = document.getElementById('loadMoreContainer');
             const nextBatch = allShows.slice(displayedCount, displayedCount + BATCH_SIZE);
-            
             if (nextBatch.length === 0 && displayedCount === 0) {
-                container.innerHTML = '<p class="col-span-full text-center text-gray-600 py-10 uppercase tracking-widest text-xs font-bold">No recordings found for this criteria.</p>';
+                container.innerHTML = '<p class="col-span-full text-center text-gray-600 py-10 uppercase tracking-widest text-xs font-bold">No High-Fidelity tapes found.</p>';
                 return;
             }
-
             container.innerHTML += nextBatch.map(show => {
                 const rating = parseFloat(show.avg_rating) || 0;
                 const isRare = rating < 4.0 && rating > 0;
                 return `
-                    <div class="glass p-8 rounded-3xl border border-gray-800 hover:border-red-600/50 transition-all duration-500 flex flex-col justify-between shadow-2xl h-full text-left relative overflow-hidden z-10">
+                    <div class="glass p-8 rounded-3xl border border-gray-800 hover:border-red-600/50 transition-all duration-500 flex flex-col justify-between shadow-2xl h-full text-left relative overflow-hidden">
                         ${isRare ? '<div class="absolute top-0 right-0 bg-red-900/80 text-[8px] px-3 py-1 uppercase font-black tracking-widest text-white rounded-bl-xl">Rare / NR</div>' : ''}
                         <div>
                             <div class="flex justify-between items-center mb-5 text-[10px] font-mono">
@@ -254,15 +238,13 @@
                         <button onclick="playShow('${show.identifier}')" class="w-full bg-white/5 hover:bg-blue-600 text-white font-black py-3 rounded-xl transition-all uppercase text-[10px] tracking-widest border border-white/10 mt-auto">Listen Now</button>
                     </div>`;
             }).join('');
-
             displayedCount += BATCH_SIZE;
             if (displayedCount < allShows.length) loadMoreBtn.classList.remove('hidden');
             else loadMoreBtn.classList.add('hidden');
         }
 
         function playShow(id) {
-            const frame = document.getElementById('player-iframe');
-            frame.innerHTML = `<iframe src="https://archive.org/embed/${id}&playlist=1" width="100%" height="150" frameborder="0"></iframe>`;
+            document.getElementById('player-iframe').innerHTML = `<iframe src="https://archive.org/embed/${id}&playlist=1" width="100%" height="150" frameborder="0"></iframe>`;
             document.getElementById('player-container').classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -272,10 +254,9 @@
             document.getElementById('player-iframe').innerHTML = '';
         }
 
-        // --- Run on Load ---
         window.onload = function() {
-            populateGlobalNotes(); // Fill the background
-            fetchFeatured();      // Load Vault of the Day
+            spawnNotes();
+            fetchFeatured();
         }
     </script>
 </body>
