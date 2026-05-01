@@ -15,12 +15,12 @@
         @keyframes float {
             0% { transform: translateY(0px); opacity: 0; }
             50% { opacity: 1; }
-            100% { transform: translateY(-40px); opacity: 0; }
+            100% { transform: translateY(-60px); opacity: 0; }
         }
-        .note { position: absolute; font-size: 24px; color: #fff; opacity: 0; animation: float 3s infinite ease-in-out; pointer-events: none; }
-        .n1 { left: 20%; animation-delay: 0s; }
-        .n2 { left: 45%; animation-delay: 1.2s; }
-        .n3 { left: 75%; animation-delay: 2.1s; }
+        .note { position: absolute; font-size: 24px; color: #fff; opacity: 0; animation: float 3s infinite ease-in-out; pointer-events: none; top: -20px; }
+        .n1 { left: 10%; animation-delay: 0s; }
+        .n2 { left: 50%; animation-delay: 1.5s; }
+        .n3 { left: 90%; animation-delay: 0.8s; }
 
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #ef4444; border-radius: 10px; }
@@ -44,10 +44,15 @@
                 <span class="note n2">♫</span>
                 <span class="note n3">♩</span>
 
-                <div class="flex items-center justify-center">
-                    <h1 class="text-6xl md:text-9xl font-black italic dead-gradient tracking-tighter leading-none uppercase">PLAY DEAD</h1>
-                </div>
+                <h1 class="text-6xl md:text-9xl font-black italic dead-gradient tracking-tighter leading-none uppercase">PLAY DEAD</h1>
                 <p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.3em] mt-4">High Fidelity Soundboard Vault</p>
+                
+                <div class="mt-6 flex flex-col items-center gap-1">
+                    <p class="text-[9px] text-gray-600 uppercase tracking-[0.2em] font-bold italic">Unique Travelers</p>
+                    <div class="bg-gray-900/80 px-4 py-2 rounded-xl border border-gray-800 flex justify-center shadow-inner">
+                        <img src="https://count.getloli.com/get/@jk_playdead_vault_fixed?theme=asoul&type=uv" alt="Counter" class="h-10 opacity-90 brightness-110">
+                    </div>
+                </div>
             </div>
 
             <div class="flex gap-2 w-full max-w-md mt-6">
@@ -58,7 +63,7 @@
 
         <section class="mb-16">
             <h2 class="text-center text-xs font-black uppercase tracking-[0.6em] text-red-500 mb-8 italic">JerK 4likes</h2>
-            <div id="jerk-recos-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div id="jerk-recos-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
             </div>
         </section>
 
@@ -220,4 +225,15 @@
         }
 
         function closePlayer() {
-            
+            document.getElementById('player-container').classList.add('hidden');
+            document.getElementById('player-iframe').innerHTML = '';
+        }
+
+        // Initialize Everything on Load
+        window.onload = function() {
+            initJerkRecos();
+            fetchFeatured();
+        };
+    </script>
+</body>
+</html>
