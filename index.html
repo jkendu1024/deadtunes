@@ -1,239 +1,71 @@
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeadTunes | 5-Star SBDs</title>
     <title>PLAY DEAD | High Fidelity Vault</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .glass { background: rgba(31, 41, 55, 0.7); backdrop-filter: blur(10px); }
-        .dead-gradient { background: linear-gradient(90deg, #ef4444, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        body { background-color: #000; background-image: radial-gradient(circle at center, #111 0%, #000 100%); }
-        .gold-glow { box-shadow: 0 0 30px rgba(234, 179, 8, 0.25); border: 1px solid rgba(234, 179, 8, 0.5); }
-        
-        /* Floating Music Notes Animation */
-        @keyframes float {
-            0% { transform: translateY(0px); opacity: 0; }
-            50% { opacity: 1; }
-            100% { transform: translateY(-60px); opacity: 0; }
-        }
-        .note { position: absolute; font-size: 24px; color: #fff; opacity: 0; animation: float 3s infinite ease-in-out; pointer-events: none; top: -20px; }
-        .n1 { left: 10%; animation-delay: 0s; }
-        .n2 { left: 50%; animation-delay: 1.5s; }
-        .n3 { left: 90%; animation-delay: 0.8s; }
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+.glass { background: rgba(31, 41, 55, 0.7); backdrop-filter: blur(10px); }
+@@ -28,13 +28,13 @@
+<img src="https://peaceproject.com/wp-content/uploads/LS455.jpg" alt="Stealie" class="w-32 h-32 md:w-44 md:h-44 drop-shadow-[0_0_25px_rgba(239,68,68,0.4)] rounded-full border-4 border-gray-900">
 
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #ef4444; border-radius: 10px; }
-    </style>
-</head>
-<body class="text-gray-100 min-h-screen font-sans">
+<div class="mt-2">
+                <h1 class="text-6xl font-black italic dead-gradient tracking-tighter leading-none text-red-600 uppercase">DEADTUNES</h1>
+                <h1 class="text-7xl font-black italic dead-gradient tracking-tighter leading-none uppercase">PLAY DEAD</h1>
+<p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.3em] mt-3">High Fidelity Soundboard Vault</p>
 
-    <div id="player-container" class="sticky top-0 z-50 w-full bg-gray-900 border-b border-red-900 hidden shadow-2xl">
-        <div class="max-w-6xl mx-auto p-2 flex flex-col">
-            <button onclick="closePlayer()" class="self-end text-[10px] text-gray-500 hover:text-white mb-1 uppercase tracking-widest font-bold px-2">✕ Close Player</button>
-            <div id="player-iframe"></div>
-        </div>
-    </div>
-
-    <div class="max-w-6xl mx-auto px-4 py-8">
-        <header class="flex flex-col items-center mb-12 gap-4 text-center">
-            <img src="https://peaceproject.com/wp-content/uploads/LS455.jpg" alt="Stealie" class="w-32 h-32 md:w-44 md:h-44 drop-shadow-[0_0_25px_rgba(239,68,68,0.4)] rounded-full border-4 border-gray-900">
-            
-            <div class="mt-4 relative w-full max-w-2xl">
-                <span class="note n1">♪</span>
-                <span class="note n2">♫</span>
-                <span class="note n3">♩</span>
-
-                <h1 class="text-6xl md:text-9xl font-black italic dead-gradient tracking-tighter leading-none uppercase">PLAY DEAD</h1>
-                <p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.3em] mt-4">High Fidelity Soundboard Vault</p>
-                
-                <div class="mt-6 flex flex-col items-center gap-1">
-                    <p class="text-[9px] text-gray-600 uppercase tracking-[0.2em] font-bold italic">Unique Travelers</p>
-                    <div class="bg-gray-900/80 px-4 py-2 rounded-xl border border-gray-800 flex justify-center shadow-inner">
-                        <img src="https://count.getloli.com/get/@jk_playdead_vault_fixed?theme=asoul&type=uv" alt="Counter" class="h-10 opacity-90 brightness-110">
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex gap-2 w-full max-w-md mt-6">
-                <input type="text" id="searchInput" placeholder="Search Year, Venue, or Date..." class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-3 w-full focus:outline-none focus:border-red-600 transition-all text-white">
-                <button onclick="handleSearch()" class="bg-red-600 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-black transition-all duration-300 uppercase text-sm">Search</button>
-            </div>
-        </header>
+<div class="mt-6 flex flex-col items-center gap-1">
+<p class="text-[9px] text-gray-600 uppercase tracking-[0.2em] font-bold italic">Unique Travelers</p>
+<div class="bg-gray-900/80 px-4 py-2 rounded-xl border border-gray-800 flex justify-center shadow-inner">
+                        <img src="https://count.getloli.com/get/@jk_deadtunes_vault_vFinal?theme=asoul&type=uv" alt="Unique Visitors" class="h-10 opacity-90 brightness-110">
+                        <img src="https://count.getloli.com/get/@jk_playdead_vault?theme=asoul&type=uv" alt="Unique Visitors" class="h-10 opacity-90 brightness-110">
+</div>
+</div>
+</div>
+@@ -45,6 +45,24 @@ <h1 class="text-6xl font-black italic dead-gradient tracking-tighter leading-non
+</div>
+</header>
 
         <section class="mb-16">
-            <h2 class="text-center text-xs font-black uppercase tracking-[0.6em] text-red-500 mb-8 italic">JerK 4likes</h2>
-            <div id="jerk-recos-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
+            <h2 class="text-center text-xs font-black uppercase tracking-[0.4em] text-red-500 mb-8 italic">JK Recommendations</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button onclick="quickSearch('Veneta 1972')" class="glass p-4 rounded-2xl border border-gray-800 hover:border-blue-500 transition-all text-left group">
+                    <p class="text-[9px] text-blue-400 font-bold uppercase mb-1">Pinnacle '72</p>
+                    <p class="font-bold text-sm text-gray-200 group-hover:text-white">Veneta, OR 8/27/72</p>
+                </button>
+                <button onclick="quickSearch('Cornell 1977')" class="glass p-4 rounded-2xl border border-gray-800 hover:border-blue-500 transition-all text-left group">
+                    <p class="text-[9px] text-blue-400 font-bold uppercase mb-1">The Holy Grail</p>
+                    <p class="font-bold text-sm text-gray-200 group-hover:text-white">Barton Hall 5/8/77</p>
+                </button>
+                <button onclick="quickSearch('Fillmore East 1970')" class="glass p-4 rounded-2xl border border-gray-800 hover:border-blue-500 transition-all text-left group">
+                    <p class="text-[9px] text-blue-400 font-bold uppercase mb-1">Acoustic/Electric Peak</p>
+                    <p class="font-bold text-sm text-gray-200 group-hover:text-white">Fillmore East 5/15/70</p>
+                </button>
             </div>
         </section>
 
-        <div id="featured-container" class="mb-16">
-            <h2 id="featured-title" class="text-center text-xs font-black uppercase tracking-[0.4em] text-yellow-500 mb-6 italic">Vault of the Day</h2>
-            <div id="featured-result" class="max-w-md mx-auto"></div>
-        </div>
+<div id="featured-container" class="mb-16">
+<h2 id="featured-title" class="text-center text-xs font-black uppercase tracking-[0.4em] text-yellow-500 mb-6 italic">Opening the Vault...</h2>
+<div id="featured-result" class="max-w-md mx-auto"></div>
+@@ -66,6 +84,12 @@ <h2 id="featured-title" class="text-center text-xs font-black uppercase tracking
+let displayedCount = 0;
+const BATCH_SIZE = 12;
 
-        <div id="loading" class="hidden flex flex-col items-center py-20">
-            <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-red-500 mb-4 border-r-transparent"></div>
-        </div>
-
-        <div id="results" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
-        <div id="loadMoreContainer" class="flex justify-center mt-12 mb-20 hidden">
-            <button onclick="renderNextBatch()" class="border border-red-600 text-red-500 hover:bg-red-600 hover:text-white px-10 py-3 rounded-full font-bold transition-all uppercase tracking-widest text-xs shadow-lg">Load More</button>
-        </div>
-    </div>
-
-    <script>
-        let allShows = [];
-        let displayedCount = 0;
-        const BATCH_SIZE = 12;
-
-        const jerkLikes = [
-            { id: 'gd72-08-27.sbd.rebel.312.sbeok.shnf', label: 'Pinnacle 72', date: '8/27/72 Veneta' },
-            { id: 'gd77-05-08.sbd.hicks.4982.sbeok.shnf', label: 'The Holy Grail', date: '5/8/77 Cornell' },
-            { id: 'gd70-05-15.sbd.rebel.90.sbeok.shnf', label: 'Acoustic Peak', date: '5/15/70 Fillmore' },
-            { id: 'gd1989-07-07.sbd.walker-scotton.revised.97658.flac16', label: '89 Heat', date: '7/7/89 JFK Stadium' }
-        ];
-
-        function initJerkRecos() {
-            const container = document.getElementById('jerk-recos-container');
-            const shuffled = [...jerkLikes].sort(() => 0.5 - Math.random());
-            container.innerHTML = shuffled.map(reco => `
-                <button onclick="playShow('${reco.id}')" class="glass p-5 rounded-2xl border border-gray-800 hover:border-red-600 hover:scale-[1.02] transition-all text-left group">
-                    <p class="text-[9px] text-red-400 font-bold uppercase mb-1">${reco.label}</p>
-                    <p class="font-bold text-sm text-gray-200 group-hover:text-white">${reco.date}</p>
-                </button>
-            `).join('');
+        // Allows JK Recommendations to trigger a search
+        function quickSearch(term) {
+            document.getElementById('searchInput').value = term;
+            handleSearch();
         }
 
-        async function fetchFeatured() {
-            try {
-                const today = new Date();
-                const month = String(today.getMonth() + 1).padStart(2, '0');
-                const day = String(today.getDate()).padStart(2, '0');
-                const query = `collection:(GratefulDead) AND date:*-${month}-${day} AND mediatype:(etree) AND subject:(soundboard)`;
-                const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=downloads+desc&rows=1&output=json`;
-                const response = await fetch(url);
-                const data = await response.json();
-                if (data.response && data.response.docs.length > 0) {
-                    document.getElementById('featured-title').innerText = "✨ Vault of the Day ✨";
-                    renderFeaturedCard(data.response.docs[0]);
-                } else { await fetchTopChoice(); }
-            } catch (e) { await fetchTopChoice(); }
-        }
+async function fetchFeatured() {
+try {
+const today = new Date();
+@@ -148,6 +172,7 @@ <h3 class="font-black text-xl leading-tight mb-4 text-white">${show.title}</h3>
+allShows = Object.values(uniqueShowsMap).sort((a, b) => new Date(a.date) - new Date(b.date));
+loading.classList.add('hidden');
+renderNextBatch();
+                window.scrollTo({ top: loading.offsetTop - 100, behavior: 'smooth' });
+} catch (err) { loading.innerHTML = "<p class='text-red-500 font-bold uppercase text-xs'>Vault Timeout - Try Again</p>"; }
+}
 
-        async function fetchTopChoice() {
-            try {
-                const query = `collection:(GratefulDead) AND avg_rating:5 AND downloads:[20000 TO 1000000]`;
-                const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=downloads+desc&rows=30&output=json`;
-                const res = await fetch(url);
-                const data = await res.json();
-                if (data.response && data.response.docs.length > 0) {
-                    document.getElementById('featured-title').innerText = "⭐ Closest Choice ⭐";
-                    const randomShow = data.response.docs[Math.floor(Math.random() * data.response.docs.length)];
-                    renderFeaturedCard(randomShow);
-                }
-            } catch (e) { document.getElementById('featured-container').style.display = 'none'; }
-        }
-
-        function renderFeaturedCard(show) {
-            document.getElementById('featured-result').innerHTML = `
-                <div class="glass p-8 rounded-3xl gold-glow flex flex-col items-center text-center">
-                    <span class="text-yellow-500 font-mono text-sm font-bold mb-2 uppercase tracking-tighter">${show.date ? show.date.split('T')[0] : 'Legendary'}</span>
-                    <h3 class="font-black text-xl leading-tight mb-4 text-white">${show.title}</h3>
-                    <p class="text-gray-400 text-[10px] uppercase tracking-widest mb-6">${show.venue || 'The Great Beyond'}</p>
-                    <button onclick="playShow('${show.identifier}')" class="bg-yellow-600 hover:bg-yellow-500 text-black font-black py-3 px-8 rounded-2xl transition-all uppercase text-xs tracking-widest">Listen Now</button>
-                </div>`;
-        }
-
-        async function handleSearch() {
-            const searchTerm = document.getElementById('searchInput').value.trim();
-            const container = document.getElementById('results');
-            const loading = document.getElementById('loading');
-            const loadMoreBtn = document.getElementById('loadMoreContainer');
-            if (!searchTerm) return;
-            loading.classList.remove('hidden');
-            loadMoreBtn.classList.add('hidden');
-            container.innerHTML = '';
-            allShows = [];
-            displayedCount = 0;
-
-            let query = 'collection:(GratefulDead) AND subject:(soundboard)';
-            const yearMatch = searchTerm.match(/\b\d{4}\b/);
-            const dateMatch = searchTerm.match(/(\d{1,2})[\/\- ](\d{1,2})[\/\- ](\d{4})/);
-            const year = yearMatch ? yearMatch[0] : null;
-            let cleanSearch = searchTerm.replace(/\b\d{4}\b/, '').trim();
-
-            if (dateMatch) {
-                const m = dateMatch[1].padStart(2, '0'), d = dateMatch[2].padStart(2, '0'), y = dateMatch[3];
-                query += ` AND date:${y}-${m}-${d}`;
-            } else if (year) { query += ` AND date:[${year}-01-01 TO ${year}-12-31]`; }
-            if (cleanSearch) { query += ` AND (title:(${cleanSearch}) OR venue:(${cleanSearch}))`; }
-
-            try {
-                const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=identifier,title,avg_rating,venue,date,downloads&sort[]=date+asc&rows=100&output=json`;
-                const response = await fetch(url);
-                const data = await response.json();
-                const uniqueShowsMap = {};
-                data.response.docs.forEach(item => {
-                    if (!item.date) return;
-                    const dateOnly = item.date.split('T')[0];
-                    if (!uniqueShowsMap[dateOnly] || item.downloads > uniqueShowsMap[dateOnly].downloads) {
-                        uniqueShowsMap[dateOnly] = item;
-                    }
-                });
-                allShows = Object.values(uniqueShowsMap).sort((a, b) => new Date(a.date) - new Date(b.date));
-                loading.classList.add('hidden');
-                renderNextBatch();
-                window.scrollTo({ top: container.offsetTop - 100, behavior: 'smooth' });
-            } catch (err) { loading.innerHTML = "<p class='text-red-500'>Vault Timeout</p>"; }
-        }
-
-        function renderNextBatch() {
-            const container = document.getElementById('results');
-            const loadMoreBtn = document.getElementById('loadMoreContainer');
-            const nextBatch = allShows.slice(displayedCount, displayedCount + BATCH_SIZE);
-            if (nextBatch.length === 0 && displayedCount === 0) {
-                container.innerHTML = '<p class="col-span-full text-center text-gray-600 py-10 uppercase tracking-widest text-xs font-bold">Nothing found.</p>';
-                return;
-            }
-            container.innerHTML += nextBatch.map(show => {
-                const isRare = parseFloat(show.avg_rating) < 4.0 && parseFloat(show.avg_rating) > 0;
-                return `
-                    <div class="glass p-7 rounded-3xl border border-gray-800 hover:border-red-600/40 transition-all duration-500 flex flex-col justify-between shadow-2xl h-full text-left relative overflow-hidden">
-                        ${isRare ? '<div class="absolute top-0 right-0 bg-red-900/80 text-[8px] px-3 py-1 uppercase font-black tracking-widest text-white rounded-bl-xl">Rare Copy</div>' : ''}
-                        <div>
-                            <div class="flex justify-between items-center mb-4 text-[10px] font-mono">
-                                <span class="text-red-500 font-bold">${show.date ? show.date.split('T')[0] : 'N/A'}</span>
-                                <span class="${isRare ? 'text-red-400' : 'text-yellow-500'} font-black">★ ${show.avg_rating || 'NR'}</span>
-                            </div>
-                            <h3 class="font-bold text-md leading-tight mb-2 line-clamp-2">${show.title}</h3>
-                            <p class="text-gray-500 text-[10px] uppercase tracking-wider mb-6 opacity-60">${show.venue || 'Various Venues'}</p>
-                        </div>
-                        <button onclick="playShow('${show.identifier}')" class="w-full bg-white/5 hover:bg-blue-600 text-white font-black py-2 rounded-xl transition-all uppercase text-[10px] tracking-widest border border-white/10 mt-auto">Stream Now</button>
-                    </div>`;
-            }).join('');
-            displayedCount += BATCH_SIZE;
-            if (displayedCount < allShows.length) loadMoreBtn.classList.remove('hidden');
-            else loadMoreBtn.classList.add('hidden');
-        }
-
-        function playShow(id) {
-            const frame = document.getElementById('player-iframe');
-            frame.innerHTML = `<iframe src="https://archive.org/embed/${id}&playlist=1" width="100%" height="150" frameborder="0"></iframe>`;
-            document.getElementById('player-container').classList.remove('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function closePlayer() {
-            document.getElementById('player-container').classList.add('hidden');
-            document.getElementById('player-iframe').innerHTML = '';
-        }
-
-        // Initialize Everything on Load
-        window.onload = function() {
-            initJerkRecos();
-            fetchFeatured();
-        };
-    </script>
-</body>
-</html>
+    
