@@ -10,6 +10,18 @@
         .dead-gradient { background: linear-gradient(90deg, #ef4444, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         body { background-color: #000; background-image: radial-gradient(circle at center, #111 0%, #000 100%); }
         .gold-glow { box-shadow: 0 0 30px rgba(234, 179, 8, 0.25); border: 1px solid rgba(234, 179, 8, 0.5); }
+        
+        /* Music Notes Animation */
+        @keyframes float {
+            0% { transform: translateY(0px) opacity(0); }
+            50% { opacity: 1; }
+            100% { transform: translateY(-20px); opacity(0); }
+        }
+        .note { position: absolute; font-size: 20px; color: #fff; opacity: 0; animation: float 3s infinite linear; }
+        .n1 { left: 40%; animation-delay: 0s; }
+        .n2 { left: 50%; animation-delay: 1s; }
+        .n3 { left: 60%; animation-delay: 2s; }
+
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #ef4444; border-radius: 10px; }
     </style>
@@ -27,14 +39,27 @@
         <header class="flex flex-col items-center mb-12 gap-4 text-center">
             <img src="https://peaceproject.com/wp-content/uploads/LS455.jpg" alt="Stealie" class="w-32 h-32 md:w-44 md:h-44 drop-shadow-[0_0_25px_rgba(239,68,68,0.4)] rounded-full border-4 border-gray-900">
             
-            <div class="mt-2">
-                <h1 class="text-7xl font-black italic dead-gradient tracking-tighter leading-none uppercase">PLAY DEAD</h1>
+            <div class="mt-2 relative">
+                <span class="note n1">♪</span>
+                <span class="note n2">♫</span>
+                <span class="note n3">♩</span>
+
+                <div class="flex items-center justify-center gap-4 md:gap-8">
+                    <h1 class="text-5xl md:text-8xl font-black italic dead-gradient tracking-tighter leading-none uppercase">PLAY</h1>
+                    
+                    <div class="w-20 h-20 md:w-32 md:h-32 mb-2">
+                        <img src="https://www.pngall.com/wp-content/uploads/14/Snoopy-Dog-House-PNG-Clipart.png" alt="Snoopy" class="w-full h-full object-contain">
+                    </div>
+
+                    <h1 class="text-5xl md:text-8xl font-black italic dead-gradient tracking-tighter leading-none uppercase">DEAD</h1>
+                </div>
+
                 <p class="text-gray-500 font-bold font-mono text-[10px] uppercase tracking-[0.3em] mt-3">High Fidelity Soundboard Vault</p>
                 
                 <div class="mt-6 flex flex-col items-center gap-1">
                     <p class="text-[9px] text-gray-600 uppercase tracking-[0.2em] font-bold italic">Unique Travelers</p>
                     <div class="bg-gray-900/80 px-4 py-2 rounded-xl border border-gray-800 flex justify-center shadow-inner">
-                        <img src="https://count.getloli.com/get/@jk_playdead_vault_jerk?theme=asoul&type=uv" alt="Unique Visitors" class="h-10 opacity-90 brightness-110">
+                        <img src="https://count.getloli.com/get/@jk_playdead_vault_snoopy?theme=asoul&type=uv" alt="Unique Visitors" class="h-10 opacity-90 brightness-110">
                     </div>
                 </div>
             </div>
@@ -57,7 +82,7 @@
                     <p class="font-bold text-sm text-gray-200 group-hover:text-white">Barton Hall 5/8/77</p>
                 </button>
                 <button onclick="quickSearch('fillmore')" class="glass p-5 rounded-2xl border border-gray-800 hover:border-red-600 hover:scale-[1.02] transition-all text-left group">
-                    <p class="text-[9px] text-red-400 font-bold uppercase mb-1">Acoustic/Electric Peak</p>
+                    <p class="text-[9px] text-red-400 font-bold uppercase mb-1">Acoustic Peak</p>
                     <p class="font-bold text-sm text-gray-200 group-hover:text-white">Fillmore East 5/15/70</p>
                 </button>
             </div>
